@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cctalklib", "cctalklib\cctalklib.csproj", "{32866FA6-BCA4-4FE8-9006-CFE92780B9BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cctalk-apptest", "cctalk-apptest\cctalk-apptest.csproj", "{32D3817B-C62E-4990-890B-EA1CF821B670}"
+	ProjectSection(ProjectDependencies) = postProject
+		{32866FA6-BCA4-4FE8-9006-CFE92780B9BF} = {32866FA6-BCA4-4FE8-9006-CFE92780B9BF}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests-cctalklib", "Tests-cctalklib\Tests-cctalklib.csproj", "{BE9705BB-58CA-418B-8F94-49D32E137575}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32866FA6-BCA4-4FE8-9006-CFE92780B9BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32866FA6-BCA4-4FE8-9006-CFE92780B9BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32866FA6-BCA4-4FE8-9006-CFE92780B9BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32866FA6-BCA4-4FE8-9006-CFE92780B9BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32D3817B-C62E-4990-890B-EA1CF821B670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32D3817B-C62E-4990-890B-EA1CF821B670}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32D3817B-C62E-4990-890B-EA1CF821B670}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32D3817B-C62E-4990-890B-EA1CF821B670}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE9705BB-58CA-418B-8F94-49D32E137575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE9705BB-58CA-418B-8F94-49D32E137575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE9705BB-58CA-418B-8F94-49D32E137575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE9705BB-58CA-418B-8F94-49D32E137575}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
