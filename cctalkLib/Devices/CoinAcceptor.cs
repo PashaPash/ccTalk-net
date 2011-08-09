@@ -328,19 +328,21 @@ namespace CctalkLib.Devices
 			{
 				if (_winformsInvokeTarget.InvokeRequired)
 				{
-					_winformsInvokeTarget.BeginInvoke(ev, new Object[] { this, ea });
-				} else
-					needDirectCall = true;
+					_winformsInvokeTarget.BeginInvoke(ev, new Object[] {this, ea});
+				}
 			}
+			else
+				needDirectCall = true;
 
 			if (_wpfInvokeTarget != null)
 			{
 				if (!_wpfInvokeTarget.CheckAccess())
 				{
 					_wpfInvokeTarget.Dispatcher.BeginInvoke(ev, this, ea);
-				} else
-					needDirectCall = true;
+				}
 			}
+			else
+				needDirectCall = true;
 
 			if (needDirectCall)
 				ev.DynamicInvoke(this, ea);
