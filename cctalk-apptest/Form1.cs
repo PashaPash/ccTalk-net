@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using dk.CctalkLib.Connections;
 using dk.CctalkLib.Devices;
@@ -16,6 +17,24 @@ namespace cctalk_apptest
 		public Form1()
 		{
 			InitializeComponent();
+		}
+
+		private void TryCreateCoinAcceptor()
+		{
+			try
+			{
+				CreateCoinAcceptor();
+			}
+			catch
+			{
+				DisposeCoinAcceptor();
+
+				//5-10 srconds device can be "Unusable"
+				Thread.Sleep(5000);
+				CreateCoinAcceptor();
+			}
+
+
 		}
 
 		private void CreateCoinAcceptor()
@@ -206,7 +225,7 @@ namespace cctalk_apptest
 		{
 			try
 			{
-				CreateCoinAcceptor();
+				TryCreateCoinAcceptor();
 			}
 			catch (Exception)
 			{
@@ -218,6 +237,11 @@ namespace cctalk_apptest
 		private void resetButton_Click(object sender, EventArgs e)
 		{
 			DisposeCoinAcceptor();
+		}
+
+		private void ready_Click(object sender, EventArgs e)
+		{
+			MessageBox.Show("IsReady = " + _ca.IsReady, Text);
 		}
 	}
 }

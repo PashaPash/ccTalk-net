@@ -47,6 +47,7 @@
 			this.resetButton = new System.Windows.Forms.Button();
 			this.deviceNumber = new System.Windows.Forms.NumericUpDown();
 			this.label2 = new System.Windows.Forms.Label();
+			this.ready = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.comNumber)).BeginInit();
 			this.contextMenuListBox.SuspendLayout();
@@ -189,6 +190,7 @@
 			// 
 			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.panel1.Controls.Add(this.ready);
 			this.panel1.Controls.Add(this.cbInhibit);
 			this.panel1.Controls.Add(this.cbPolling);
 			this.panel1.Enabled = false;
@@ -255,6 +257,16 @@
 			this.label2.TabIndex = 2;
 			this.label2.Text = "Device number";
 			// 
+			// ready
+			// 
+			this.ready.Location = new System.Drawing.Point(4, 47);
+			this.ready.Name = "ready";
+			this.ready.Size = new System.Drawing.Size(75, 36);
+			this.ready.TabIndex = 5;
+			this.ready.Text = "Ready?";
+			this.ready.UseVisualStyleBackColor = true;
+			this.ready.Click += new System.EventHandler(this.ready_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -303,6 +315,7 @@
 		private System.Windows.Forms.Button resetButton;
 		private System.Windows.Forms.NumericUpDown deviceNumber;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Button ready;
     }
 }
 
