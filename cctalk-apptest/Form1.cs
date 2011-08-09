@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Windows.Forms;
 using dk.CctalkLib.Connections;
@@ -9,19 +10,20 @@ namespace cctalk_apptest
 {
 	public partial class Form1 : Form
 	{
-		readonly CoinAcceptor _ca;
+		CoinAcceptor _ca;
 		Decimal _coinCounter = 0;
 
 		public Form1()
 		{
 			InitializeComponent();
+		}
 
+		private void CreateCoinAcceptor()
+		{
 			var con = new ConnectionRs232
 			          	{
-			          		PortName = "com12",
+			          		PortName = GetCom(),
 			          	};
-
-
 
 			_ca = new CoinAcceptor(
 				14,
@@ -41,19 +43,67 @@ namespace cctalk_apptest
 						{15, new CoinTypeInfo("10 ruble",10M)},
 					},
 				null,
-				this
+				null as ISynchronizeInvoke /*this*/
 				);
+			
 			_ca.CoinAccepted += _ca_CoinAccepted;
 			_ca.ErrorMessageAccepted += _ca_ErrorMessageAccepted;
+
+			_ca.Init();
+
+			groupBox1.Enabled = true;
+			panel1.Enabled = true;
+
+			initButton.Enabled = false;
+			resetButton.Enabled = true;
+
+		}
+
+		private void DisposeCoinAcceptor()
+		{
+			if (_ca == null)
+				return;
+
+			if (_ca.IsInitialized)
+			{
+				_ca.IsInhibiting = true;
+				_ca.UnInit();
+			}
+
+			_ca.Dispose();
+
+			_ca = null;
+
+			groupBox1.Enabled = false;
+			panel1.Enabled = false;
+			initButton.Enabled = true;
+			resetButton.Enabled = false;
+		}
+
+
+		private string GetCom()
+		{
+			return string.Format("com{0:g0}", comNumber.Value);
 		}
 
 		void _ca_ErrorMessageAccepted(object sender, CoinAcceptorErrorEventArgs e)
 		{
+			if (InvokeRequired)
+			{
+				Invoke((EventHandler<CoinAcceptorErrorEventArgs>)_ca_ErrorMessageAccepted, sender, e);
+				return;
+			}
+
 			listBox1.Items.Add(String.Format("Coin acceptor error: {0} ({1}, {2:X2})", e.ErrorMessage, e.Error, (Byte)e.Error));
 		}
 
 		void _ca_CoinAccepted(object sender, CoinAcceptorCoinEventArgs e)
 		{
+			if(InvokeRequired)
+			{
+				Invoke((EventHandler<CoinAcceptorCoinEventArgs>) _ca_CoinAccepted, sender, e);
+				return;
+			}
 			_coinCounter += e.CoinValue;
 			listBox1.Items.Add(String.Format("Coin accepted: {0} ({1:X2}), path {3}. Now accepted: {2:C}", e.CoinName, e.CoinCode, _coinCounter, e.RoutePath));
 
@@ -63,7 +113,7 @@ namespace cctalk_apptest
 		{
 			var con = new ConnectionRs232
 			{
-				PortName = "com12",
+				PortName = GetCom(),
 			};
 			con.Open();
 
@@ -117,20 +167,6 @@ namespace cctalk_apptest
 
 			}
 
-
-			//c.CmdReset();
-
-			//listBox1.Items.Add(
-			//    String.Format(
-			//        "{0}=>{1}({2}) D:{3}",
-			//        resp.SrcAdr,
-			//        resp.DestAdr,
-			//        resp.Header,
-			//        ByteToAscii.Execute(resp.Data)
-			//        )
-			//    );
-
-
 			con.Close();
 
 		}
@@ -152,7 +188,7 @@ namespace cctalk_apptest
 			else
 				_ca.EndPoll();
 
-			groupBox1.Enabled = !_ca.IsInitialized;
+			groupBox1.Enabled = !_ca.IsPolling;
 
 		}
 
@@ -164,6 +200,24 @@ namespace cctalk_apptest
 		private void cbInhibit_CheckedChanged(object sender, EventArgs e)
 		{
 			_ca.IsInhibiting = cbInhibit.Checked;
+		}
+
+		private void initButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				CreateCoinAcceptor();
+			}
+			catch (Exception)
+			{
+				DisposeCoinAcceptor();
+				throw;
+			}
+		}
+
+		private void resetButton_Click(object sender, EventArgs e)
+		{
+			DisposeCoinAcceptor();
 		}
 	}
 }

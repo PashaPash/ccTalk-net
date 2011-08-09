@@ -350,28 +350,25 @@ namespace dk.CctalkLib.Devices
 		{
 			if (ev == null) return;
 
-			bool needDirectCall = false;
+			bool wasCall = false;
 			if (_winformsInvokeTarget != null)
 			{
 				if (_winformsInvokeTarget.InvokeRequired)
 				{
-					_winformsInvokeTarget.BeginInvoke(ev, new Object[] {this, ea});
+					_winformsInvokeTarget.BeginInvoke(ev, new Object[] { this, ea });
+					wasCall = true;
 				}
-			}
-			else
-				needDirectCall = true;
-
-			if (_wpfInvokeTarget != null)
+			} 
+			else if (_wpfInvokeTarget != null)
 			{
 				if (!_wpfInvokeTarget.CheckAccess())
 				{
 					_wpfInvokeTarget.Dispatcher.BeginInvoke(ev, this, ea);
+					wasCall = true;
 				}
 			}
-			else
-				needDirectCall = true;
 
-			if (needDirectCall)
+			if (!wasCall)
 				ev.DynamicInvoke(this, ea);
 		}
 

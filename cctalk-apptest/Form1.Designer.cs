@@ -34,6 +34,8 @@
 			this.radioButton3 = new System.Windows.Forms.RadioButton();
 			this.radioButton2 = new System.Windows.Forms.RadioButton();
 			this.radioButton1 = new System.Windows.Forms.RadioButton();
+			this.label1 = new System.Windows.Forms.Label();
+			this.comNumber = new System.Windows.Forms.NumericUpDown();
 			this.listBox1 = new System.Windows.Forms.ListBox();
 			this.contextMenuListBox = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,16 +43,22 @@
 			this.cbPolling = new System.Windows.Forms.CheckBox();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.cbInhibit = new System.Windows.Forms.CheckBox();
+			this.initButton = new System.Windows.Forms.Button();
+			this.resetButton = new System.Windows.Forms.Button();
+			this.deviceNumber = new System.Windows.Forms.NumericUpDown();
+			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.comNumber)).BeginInit();
 			this.contextMenuListBox.SuspendLayout();
 			this.panel1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.deviceNumber)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// button1
 			// 
-			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.button1.Location = new System.Drawing.Point(6, 207);
+			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.button1.Location = new System.Drawing.Point(6, 101);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(101, 74);
 			this.button1.TabIndex = 0;
@@ -60,15 +68,16 @@
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox1.Controls.Add(this.radioButton3);
 			this.groupBox1.Controls.Add(this.radioButton2);
 			this.groupBox1.Controls.Add(this.radioButton1);
 			this.groupBox1.Controls.Add(this.button1);
+			this.groupBox1.Enabled = false;
 			this.groupBox1.Location = new System.Drawing.Point(426, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(113, 290);
+			this.groupBox1.Size = new System.Drawing.Size(113, 181);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Command select";
@@ -105,16 +114,42 @@
 			this.radioButton1.Text = "ReadBuffer";
 			this.radioButton1.UseVisualStyleBackColor = true;
 			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(429, 196);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(66, 13);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Com number";
+			// 
+			// comNumber
+			// 
+			this.comNumber.Location = new System.Drawing.Point(430, 212);
+			this.comNumber.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.comNumber.Name = "comNumber";
+			this.comNumber.Size = new System.Drawing.Size(100, 20);
+			this.comNumber.TabIndex = 1;
+			this.comNumber.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+			// 
 			// listBox1
 			// 
-			this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.listBox1.ContextMenuStrip = this.contextMenuListBox;
 			this.listBox1.FormattingEnabled = true;
 			this.listBox1.Location = new System.Drawing.Point(12, 12);
 			this.listBox1.Name = "listBox1";
-			this.listBox1.Size = new System.Drawing.Size(408, 290);
+			this.listBox1.Size = new System.Drawing.Size(408, 277);
 			this.listBox1.TabIndex = 3;
 			// 
 			// contextMenuListBox
@@ -152,13 +187,14 @@
 			// 
 			// panel1
 			// 
-			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.panel1.Controls.Add(this.cbInhibit);
 			this.panel1.Controls.Add(this.cbPolling);
-			this.panel1.Location = new System.Drawing.Point(12, 308);
+			this.panel1.Enabled = false;
+			this.panel1.Location = new System.Drawing.Point(12, 298);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(527, 76);
+			this.panel1.Size = new System.Drawing.Size(408, 86);
 			this.panel1.TabIndex = 5;
 			// 
 			// cbInhibit
@@ -172,11 +208,64 @@
 			this.cbInhibit.UseVisualStyleBackColor = true;
 			this.cbInhibit.CheckedChanged += new System.EventHandler(this.cbInhibit_CheckedChanged);
 			// 
+			// initButton
+			// 
+			this.initButton.Location = new System.Drawing.Point(432, 298);
+			this.initButton.Name = "initButton";
+			this.initButton.Size = new System.Drawing.Size(100, 41);
+			this.initButton.TabIndex = 6;
+			this.initButton.Text = "Init";
+			this.initButton.UseVisualStyleBackColor = true;
+			this.initButton.Click += new System.EventHandler(this.initButton_Click);
+			// 
+			// resetButton
+			// 
+			this.resetButton.Enabled = false;
+			this.resetButton.Location = new System.Drawing.Point(432, 345);
+			this.resetButton.Name = "resetButton";
+			this.resetButton.Size = new System.Drawing.Size(100, 39);
+			this.resetButton.TabIndex = 6;
+			this.resetButton.Text = "Reset";
+			this.resetButton.UseVisualStyleBackColor = true;
+			this.resetButton.Click += new System.EventHandler(this.resetButton_Click);
+			// 
+			// deviceNumber
+			// 
+			this.deviceNumber.Location = new System.Drawing.Point(432, 256);
+			this.deviceNumber.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.deviceNumber.Name = "deviceNumber";
+			this.deviceNumber.Size = new System.Drawing.Size(100, 20);
+			this.deviceNumber.TabIndex = 1;
+			this.deviceNumber.Value = new decimal(new int[] {
+            14,
+            0,
+            0,
+            0});
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(431, 240);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(79, 13);
+			this.label2.TabIndex = 2;
+			this.label2.Text = "Device number";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(551, 396);
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.label2);
+			this.Controls.Add(this.resetButton);
+			this.Controls.Add(this.comNumber);
+			this.Controls.Add(this.deviceNumber);
+			this.Controls.Add(this.initButton);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.listBox1);
 			this.Controls.Add(this.groupBox1);
@@ -184,10 +273,13 @@
 			this.Text = "ccTalk simple demo app";
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.comNumber)).EndInit();
 			this.contextMenuListBox.ResumeLayout(false);
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.deviceNumber)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
         }
 
@@ -205,6 +297,12 @@
 		private System.Windows.Forms.ToolStripMenuItem clearMoneyCounterToolStripMenuItem;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.CheckBox cbInhibit;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.NumericUpDown comNumber;
+		private System.Windows.Forms.Button initButton;
+		private System.Windows.Forms.Button resetButton;
+		private System.Windows.Forms.NumericUpDown deviceNumber;
+		private System.Windows.Forms.Label label2;
     }
 }
 
