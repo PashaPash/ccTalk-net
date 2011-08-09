@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Threading;
 using System.IO.Ports;
-using CctalkLib.Devices;
 using dk.CctalkLib.Checksumms;
 using dk.CctalkLib.Devices;
 using dk.CctalkLib.Messages;
 
 namespace dk.CctalkLib.Connections
 {
+
+	/// <summary>
+	///  Incapsulates routines for Com-port exchange with device.
+	///  Provides syncronisation for send requests and waits for respond from device.
+	/// </summary>
 	public class ConnectionRs232 : ICctalkConnection
 	{
 		enum RespondAcceptionPhase
@@ -114,11 +118,17 @@ namespace dk.CctalkLib.Connections
 
 		#region IConnection members
 
+		/// <summary>
+		///  Is port open?
+		/// </summary>
 		public bool IsOpen()
 		{
 			return _port.IsOpen;
 		}
 
+		/// <summary>
+		///  Opens port
+		/// </summary>
 		public void Open()
 		{
 			lock (_callSyncRoot)
@@ -129,6 +139,9 @@ namespace dk.CctalkLib.Connections
 			}
 		}
 
+		/// <summary>
+		///  Closes port.
+		/// </summary>
 		public void Close()
 		{
 			lock (_callSyncRoot)
@@ -139,6 +152,9 @@ namespace dk.CctalkLib.Connections
 		}
 
 
+		/// <summary>
+		///  Sends Cctalk message to device and waits for answer.
+		/// </summary>
 		public CctalkMessage Send(CctalkMessage com, ICctalkChecksum chHandler)
 		{
 			// TODO: handle BUSY message

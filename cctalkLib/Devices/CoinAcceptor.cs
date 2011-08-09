@@ -4,9 +4,8 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows.Threading;
 using dk.CctalkLib.Connections;
-using dk.CctalkLib.Devices;
 
-namespace CctalkLib.Devices
+namespace dk.CctalkLib.Devices
 {
 
 	/// <summary>
@@ -24,7 +23,14 @@ namespace CctalkLib.Devices
 		Timer _t;
 		Byte _lastEvent;
 
+		/// <summary>
+		/// Fires when coin was accepted. Only when polling is on.
+		/// </summary>
 		public event EventHandler<CoinAcceptorCoinEventArgs> CoinAccepted;
+
+		/// <summary>
+		/// Fires when any error was detected during poll.
+		/// </summary>
 		public event EventHandler<CoinAcceptorErrorEventArgs> ErrorMessageAccepted;
 
 		TimeSpan _pollInterval;
@@ -151,7 +157,9 @@ namespace CctalkLib.Devices
 			IsInitialized = true;
 		}
 
-
+		/// <summary>
+		///  Closes port
+		/// </summary>
 		public void UnInit()
 		{
 			lock (_timersSyncRoot)
@@ -163,14 +171,22 @@ namespace CctalkLib.Devices
 
 		}
 
-
+		/// <summary>
+		///  true - port is open, ready for sending commands
+		/// </summary>
 		public Boolean IsInitialized { get; private set; }
 
 		/// <summary>
 		///  ccTalk address of device. 0 - broadcast.
 		/// </summary>
 		public Byte Address { get { return _rawDev.Address; } }
+
+		/// <summary>
+		///  Is polling is running now. Commands (as IsReady) CAN be sent while polling.
+		/// </summary>
 		public Boolean IsPolling { get { return _t != null; } }
+
+
 		protected String ProductCode { get; private set; }
 
 		/// <summary>
@@ -178,11 +194,22 @@ namespace CctalkLib.Devices
 		/// </summary>
 		public Int32 SerialNumber { get; private set; }
 
+		/// <summary>
+		///  Manufacter name of device. Value accepted from device while Init.
+		/// </summary>
 		public String Manufacturer { get; private set; }
+
+		/// <summary>
+		///  Type of device. Value accepted from device while Init.
+		/// </summary>
 		public CctalkDeviceTypes DeviceCategory { get; private set; }
 
 
 		bool _isInhibiting;
+
+		/// <summary>
+		///  Indicates the state, when device is rejecting all coins.
+		/// </summary>
 		public Boolean IsInhibiting
 		{
 			get { return _isInhibiting; }
@@ -352,8 +379,8 @@ namespace CctalkLib.Devices
 		{
 			Dispose(true);
 		}
-
-		public void Dispose(Boolean disposing)
+		
+		void Dispose(Boolean disposing)
 		{
 			UnInit();
 		}

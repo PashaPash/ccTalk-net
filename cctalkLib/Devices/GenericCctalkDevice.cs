@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CctalkLib.Devices;
 using dk.CctalkLib.Checksumms;
 using dk.CctalkLib.Connections;
 using dk.CctalkLib.Messages;

@@ -1,5 +1,4 @@
 ﻿using System;
-using CctalkLib.Devices;
 
 namespace dk.CctalkLib.Devices
 {

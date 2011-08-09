@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
-using CctalkLib.Devices;
 using dk.CctalkLib.Connections;
 using dk.CctalkLib.Devices;
 
