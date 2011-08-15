@@ -1,13 +1,13 @@
 namespace dk.CctalkLib.Checksumms.Helpers
 {
-    public enum CRCType
+    enum CRCType
     {
         CRC16 = 100,
         CRC32 = 101,
         CRC16CCITT = 102
     }
     
-    public enum InitialCrcValue 
+    enum InitialCrcValue 
     { 
         Zeros = 0x0000, 
         NonZero1 = 0xffff, 

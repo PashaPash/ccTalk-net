@@ -135,24 +135,45 @@ namespace dk.CctalkLib.Devices
 		}
 		#endregion
 
+
+		/// <summary>
+		/// Connection used for communication with cctalk device
+		/// </summary>
+		public ICctalkConnection Connection
+		{
+			get { return _rawDev.Connection; }
+		}
+
+
 		/// <summary>
 		///  Opens connection and request main data from device (e.g. Serial number)
+		///  If there is some data in event buffer - events will be raised
 		/// </summary>
-		public void Init()
+		public void Init(Boolean ignoreLastEvents = true)
 		{
 			_rawDev.Connection.Open();
 
 			DeviceCategory = _rawDev.CmdRequestEquipmentCategory();
 			if (DeviceCategory != CctalkDeviceTypes.CoinAcceptor)
-				throw new InvalidOperationException("Connected device is not a coin acceptor");
+				throw new InvalidOperationException("Connected device is not a coin acceptor. " + DeviceCategory);
 
-			_rawDev.CmdReset();
+			//_rawDev.CmdReset();
 			_rawDev.CmdSetMasterInhibitStatus(IsInhibiting);
 
 			SerialNumber = _rawDev.CmdGetSerial();
 			PollInterval = _rawDev.CmdRequestPollingPriority();
 			Manufacturer = _rawDev.CmdRequestManufacturerId();
 			ProductCode = _rawDev.CmdRequestProductCode();
+
+			var evBuf = _rawDev.CmdReadEventBuffer();
+
+			if (!ignoreLastEvents)
+			{
+				var newEv = GetNewEventsCountHelper(_lastEvent, evBuf.Counter);
+				RaiseEventsByBufferHelper(evBuf, newEv);
+			}
+			_lastEvent = evBuf.Counter;
+
 
 			IsInitialized = true;
 		}
@@ -285,6 +306,7 @@ namespace dk.CctalkLib.Devices
 			}
 		}
 
+		Boolean _isResetExpected = false;
 
 		void TimerTick(object state)
 		{
@@ -292,42 +314,73 @@ namespace dk.CctalkLib.Devices
 			{
 				var buf = _rawDev.CmdReadEventBuffer();
 
-				var newEventsCount = _lastEvent <= buf.Counter ? buf.Counter - _lastEvent : (255 - _lastEvent) + buf.Counter;
+				var wasReset = buf.Counter == 0;
+				if (wasReset)
+				{
+					if (!_isResetExpected && _lastEvent != 0)
+					{
+						BeginInvokeErrorEvent(
+							new CoinAcceptorErrorEventArgs(
+								CoinAcceptorErrors.UnspecifiedAlarmCode,
+								"Unexpected reset"
+								)
+							);
+					}
+				}
+
+				_isResetExpected = false;
+				var newEventsCount = GetNewEventsCountHelper(_lastEvent, buf.Counter);
+
 				_lastEvent = buf.Counter;
 
-				if (newEventsCount != 0)
+				RaiseEventsByBufferHelper(buf, newEventsCount);
+
+				_lastEvent = buf.Counter;
+
+			}
+		}
+
+		static Byte GetNewEventsCountHelper(Byte lastCounerVal, Byte newCounterVal)
+		{
+			if (newCounterVal == 0) return 0;
+
+			int newEventsCount = lastCounerVal <= newCounterVal
+						? newCounterVal - lastCounerVal
+						: (255 - lastCounerVal) + newCounterVal;
+
+			return Convert.ToByte(newEventsCount);
+		}
+
+		void RaiseEventsByBufferHelper(DeviceEventBuffer buf, Byte countToShow)
+		{
+			if (countToShow == 0) return;
+
+			for (int i = 0; i < Math.Min(countToShow, buf.Events.Length); i++)
+			{
+				var ev = buf.Events[i];
+				if (ev.IsError)
 				{
-					for (int i = 0; i < Math.Min(newEventsCount, buf.Events.Length); i++)
-					{
-						var ev = buf.Events[i];
-						if (ev.IsError)
-						{
-							String errMsg;
-							var errCode = (CoinAcceptorErrors)ev.ErrorOrRouteCode;
-							_errors.TryGetValue(ev.ErrorOrRouteCode, out errMsg);
-							BeginInvokeErrorEvent(new CoinAcceptorErrorEventArgs(errCode, errMsg));
+					String errMsg;
+					var errCode = (CoinAcceptorErrors)ev.ErrorOrRouteCode;
+					_errors.TryGetValue(ev.ErrorOrRouteCode, out errMsg);
+					BeginInvokeErrorEvent(new CoinAcceptorErrorEventArgs(errCode, errMsg));
 
-						} else
-						{
-							CoinTypeInfo coinInfo;
-							_coins.TryGetValue(ev.CoinCode, out coinInfo);
-							var evVal = coinInfo == null ? 0 : coinInfo.Value;
-							var evName = coinInfo == null ? null : coinInfo.Name;
-							BeginInvokeCoinEvent(new CoinAcceptorCoinEventArgs(evName, evVal, ev.CoinCode, ev.ErrorOrRouteCode));
-						}
-					}
-
-					var eventsLost = newEventsCount - buf.Events.Length;
-
-					if (eventsLost > 0)
-					{
-						BeginInvokeErrorEvent(new CoinAcceptorErrorEventArgs(CoinAcceptorErrors.UnspecifiedAlarmCode,
-																			 "Events lost:" + eventsLost));
-					}
-
-					_lastEvent = buf.Counter;
+				} else
+				{
+					CoinTypeInfo coinInfo;
+					_coins.TryGetValue(ev.CoinCode, out coinInfo);
+					var evVal = coinInfo == null ? 0 : coinInfo.Value;
+					var evName = coinInfo == null ? null : coinInfo.Name;
+					BeginInvokeCoinEvent(new CoinAcceptorCoinEventArgs(evName, evVal, ev.CoinCode, ev.ErrorOrRouteCode));
 				}
-				// TODO: signal unexpected device reset, when device`s event cointer go to 0
+			}
+
+			var eventsLost = countToShow - buf.Events.Length;
+
+			if (eventsLost > 0)
+			{
+				BeginInvokeErrorEvent(new CoinAcceptorErrorEventArgs(CoinAcceptorErrors.UnspecifiedAlarmCode,
+																	 "Events lost:" + eventsLost));
 			}
 
 

@@ -2,6 +2,10 @@
 
 namespace dk.CctalkLib.Checksumms
 {
+	/// <summary>
+	///  Type of checksumm for cctalk messages.
+	///  ** CRC is currenly not supported (but there is some raw code for it) **
+	/// </summary>
     public enum CheckSumType
     {
         None = 0,

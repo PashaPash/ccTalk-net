@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using dk.CctalkLib.Checksumms;
 using dk.CctalkLib.Connections;
 using dk.CctalkLib.Messages;
@@ -75,6 +76,8 @@ namespace dk.CctalkLib.Devices
 			var msg = CreateMessage(1);
 
 			Connection.Send(msg, _checksumHandler);
+			//TODO: after reset device could not respond for random time. workaround needed. Maybe sleep?
+			Thread.Sleep(50); // not wery useful in multithread program
 		}
 
 		public void CmdSimplePoll()

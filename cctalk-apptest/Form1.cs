@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -24,14 +25,14 @@ namespace cctalk_apptest
 			try
 			{
 				CreateCoinAcceptor();
-			}
-			catch
+			} catch(Exception ex)
 			{
+				MessageBox.Show(ex.ToString());
 				DisposeCoinAcceptor();
 
-				//5-10 srconds device can be "Unusable"
-				Thread.Sleep(5000);
-				CreateCoinAcceptor();
+				////5-10 srconds device can be "Unusable"
+				//Thread.Sleep(5000);
+				//CreateCoinAcceptor();
 			}
 
 
@@ -40,31 +41,31 @@ namespace cctalk_apptest
 		private void CreateCoinAcceptor()
 		{
 			var con = new ConnectionRs232
-			          	{
-			          		PortName = GetCom(),
-			          	};
+						{
+							PortName = GetCom(),
+						};
 
 			_ca = new CoinAcceptor(
-				14,
+				Convert.ToByte(deviceNumber.Value),
 				con,
 				new Dictionary<byte, CoinTypeInfo>
 					{
-						{5, new CoinTypeInfo("50kNew",0.5M)},
-						{6, new CoinTypeInfo("1 R new",1M)},
-						{7, new CoinTypeInfo("2 R new",2M)},
-						{8, new CoinTypeInfo("5 R new",5M)},
-						{9, new CoinTypeInfo("10 R new",10M)},
+						{5, new CoinTypeInfo("50kNew", 0.5M)},
+						{6, new CoinTypeInfo("1 R new", 1M)},
+						{7, new CoinTypeInfo("2 R new", 2M)},
+						{8, new CoinTypeInfo("5 R new", 5M)},
+						{9, new CoinTypeInfo("10 R new", 10M)},
 
-						{11, new CoinTypeInfo("50 kopec",0.5M)},
-						{12, new CoinTypeInfo("1 rubles",1M)},
-						{13, new CoinTypeInfo("2 rubles",2M)},
-						{14, new CoinTypeInfo("5 rubles",5M)},
-						{15, new CoinTypeInfo("10 ruble",10M)},
+						{11, new CoinTypeInfo("50 kopec", 0.5M)},
+						{12, new CoinTypeInfo("1 rubles", 1M)},
+						{13, new CoinTypeInfo("2 rubles", 2M)},
+						{14, new CoinTypeInfo("5 rubles", 5M)},
+						{15, new CoinTypeInfo("10 ruble", 10M)},
 					},
 				null,
 				null as ISynchronizeInvoke /*this*/
 				);
-			
+
 			_ca.CoinAccepted += _ca_CoinAccepted;
 			_ca.ErrorMessageAccepted += _ca_ErrorMessageAccepted;
 
@@ -118,75 +119,91 @@ namespace cctalk_apptest
 
 		void _ca_CoinAccepted(object sender, CoinAcceptorCoinEventArgs e)
 		{
-			if(InvokeRequired)
+			if (InvokeRequired)
 			{
-				Invoke((EventHandler<CoinAcceptorCoinEventArgs>) _ca_CoinAccepted, sender, e);
+				Invoke((EventHandler<CoinAcceptorCoinEventArgs>)_ca_CoinAccepted, sender, e);
 				return;
 			}
 			_coinCounter += e.CoinValue;
 			listBox1.Items.Add(String.Format("Coin accepted: {0} ({1:X2}), path {3}. Now accepted: {2:C}", e.CoinName, e.CoinCode, _coinCounter, e.RoutePath));
-
 		}
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			var con = new ConnectionRs232
+			// Attention! There we are creating new device object. But it could share connection with _ca.
+
+			ICctalkConnection con;
+			Boolean isMyConnection;
+
+			if (_ca.Connection.IsOpen())
 			{
-				PortName = GetCom(),
-			};
-			con.Open();
-
-			var c = new GenericCctalkDevice
-			        	{
-			        		Connection = con,
-							Address = 0
-			        	};
-
-			if (radioButton1.Checked)
+				con = _ca.Connection;
+				isMyConnection = false;
+			} else
 			{
-				var buf = c.CmdReadEventBuffer();
-
-				var newEventsCount = _lastEvent <= buf.Counter ? buf.Counter - _lastEvent : (255 - _lastEvent) + buf.Counter;
-				_lastEvent = buf.Counter;
-
-				if (newEventsCount == 0)
+				con = new ConnectionRs232
 				{
-					listBox1.Items.Add("Нет новых событий");
-				} else
+					PortName = GetCom(),
+				};
+				con.Open();
+				isMyConnection = true;
+			}
+			try
+			{
+				var c = new GenericCctalkDevice
+							{
+								Connection = con,
+								Address = 0
+							};
+
+				if (radioButton1.Checked)
 				{
-					var sb = new StringBuilder();
-					sb.Append("Принято: ");
-					for (int i = 0; i < Math.Min(newEventsCount, buf.Events.Length); i++)
-					{
-						var ev = buf.Events[i];
-						sb.AppendFormat("({0:X2} {1:X2}) ", ev.CoinCode, ev.ErrorOrRouteCode);
-					}
+					var buf = c.CmdReadEventBuffer();
 
-					var eventsLost = newEventsCount - buf.Events.Length;
-
-					if (eventsLost > 0)
-					{
-						sb.AppendFormat(" Пропущено событий: {0}", eventsLost);
-					}
-
+					var newEventsCount = _lastEvent <= buf.Counter ? buf.Counter - _lastEvent : (255 - _lastEvent) + buf.Counter;
 					_lastEvent = buf.Counter;
 
-					listBox1.Items.Add(sb.ToString());
+					if (newEventsCount == 0)
+					{
+						listBox1.Items.Add("Нет новых событий");
+					} else
+					{
+						var sb = new StringBuilder();
+						sb.Append("Принято: ");
+						for (int i = 0; i < Math.Min(newEventsCount, buf.Events.Length); i++)
+						{
+							var ev = buf.Events[i];
+							sb.AppendFormat("({0:X2} {1:X2}) ", ev.CoinCode, ev.ErrorOrRouteCode);
+						}
+
+						var eventsLost = newEventsCount - buf.Events.Length;
+
+						if (eventsLost > 0)
+						{
+							sb.AppendFormat(" Пропущено событий: {0}", eventsLost);
+						}
+
+						_lastEvent = buf.Counter;
+
+						listBox1.Items.Add(sb.ToString());
+					}
+
+				} else if (radioButton2.Checked)
+				{
+					var serial = c.CmdGetSerial();
+					listBox1.Items.Add(String.Format("SN: {0}", serial));
+
+				} else if (radioButton3.Checked)
+				{
+					c.CmdReset();
+					_lastEvent = 0;
+
 				}
-
-			} else if (radioButton2.Checked)
+			} finally
 			{
-				var serial = c.CmdGetSerial();
-				listBox1.Items.Add(String.Format("SN: {0}", serial));
-
-			} else if (radioButton3.Checked)
-			{
-				c.CmdReset();
-				_lastEvent = 0;
-
+				if (isMyConnection)
+					con.Close();
 			}
-
-			con.Close();
 
 		}
 
@@ -199,7 +216,9 @@ namespace cctalk_apptest
 
 		private void cbPolling_CheckedChanged(object sender, EventArgs e)
 		{
-			if(!_ca.IsInitialized)
+			if (_ca == null) return;
+
+			if (!_ca.IsInitialized)
 				_ca.Init();
 
 			if (cbPolling.Checked)
@@ -207,7 +226,7 @@ namespace cctalk_apptest
 			else
 				_ca.EndPoll();
 
-			groupBox1.Enabled = !_ca.IsPolling;
+			//groupBox1.Enabled = !_ca.IsPolling;
 
 		}
 
@@ -226,22 +245,29 @@ namespace cctalk_apptest
 			try
 			{
 				TryCreateCoinAcceptor();
-			}
-			catch (Exception)
+			} catch (Exception ex)
 			{
+
 				DisposeCoinAcceptor();
-				throw;
+				MessageBox.Show(ex.Message, "Error while connecting device", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
 		private void resetButton_Click(object sender, EventArgs e)
 		{
 			DisposeCoinAcceptor();
+			cbPolling.Checked = false;
+
 		}
 
 		private void ready_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show("IsReady = " + _ca.IsReady, Text);
+		}
+
+		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			Properties.Settings.Default.Save();
 		}
 	}
 }

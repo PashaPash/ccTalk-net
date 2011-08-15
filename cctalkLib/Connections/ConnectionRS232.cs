@@ -158,7 +158,6 @@ namespace dk.CctalkLib.Connections
 		public CctalkMessage Send(CctalkMessage com, ICctalkChecksum chHandler)
 		{
 			// TODO: handle BUSY message
-
 			lock (_callSyncRoot)
 			{
 				if (_respondAcceptionPhase != RespondAcceptionPhase.CommandNotSent)
@@ -167,7 +166,7 @@ namespace dk.CctalkLib.Connections
 				var msgBytes = com.GetTransferDataNoChecksumm();
 				chHandler.CalcAndApply(msgBytes);
 
-
+				_respondBufPos = 0;
 				_lastRespond = null;
 				_respondChecksumChecker = chHandler;
 
@@ -189,15 +188,23 @@ namespace dk.CctalkLib.Connections
 					switch (_respondAcceptionPhase)
 					{
 						case RespondAcceptionPhase.WaitingResponseStart:
-							if (tsAge > 2000) throw new TimeoutException("No reply");
+							if (tsAge > 5000)
+							{
+								_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
+								throw new TimeoutException("No reply");
+							}
 							break;
 						case RespondAcceptionPhase.Accepting:
-							if (tsAge > 50) throw new TimeoutException("Pause in reply");
+							if (tsAge > 50)
+							{
+								_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
+								throw new TimeoutException("Pause in reply"); // TODO: no exception, just return null or invalid respond
+							}
 							break;
 
 
 					}
-					if (tsAge > 50) throw new TimeoutException("No reply");
+					//if (tsAge > 50) throw new TimeoutException("No reply");
 				}
 
 				_respondChecksumChecker = null;
