@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using dk.CctalkLib.Checksumms;
 using NUnit.Framework;
 
@@ -49,6 +50,14 @@ namespace Tests_cctalklib
 			Assert.IsTrue(c.Check(b, 0, b.Length));
 		}
 
+		//[Test]
+		//public void Tick()
+		//{
+		//    var t1 = Environment.TickCount;
+		//    Thread.Sleep(5000);
+		//    var t2 = Environment.TickCount;
+		//    Console.WriteLine(t2 - t1);
 
+		//}
 	}
 }

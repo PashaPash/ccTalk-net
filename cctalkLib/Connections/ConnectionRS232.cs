@@ -196,7 +196,7 @@ namespace dk.CctalkLib.Connections
 							}
 							break;
 						case RespondAcceptionPhase.Accepting:
-							if (tsAge > 100)
+							if (tsAge > 50)
 							{
 								_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
 								throw new TimeoutException("Pause in reply"); // TODO: no exception, just return null or invalid respond

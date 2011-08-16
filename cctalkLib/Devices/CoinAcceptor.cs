@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
+using System.Timers;
 using System.Windows.Threading;
 using dk.CctalkLib.Connections;
 
@@ -274,7 +274,12 @@ namespace dk.CctalkLib.Devices
 			{
 				if (!_rawDev.Connection.IsOpen())
 					throw new InvalidOperationException("Init first");
-				_t = new Timer(TimerTick, _rawDev, 50, PollPeriod);
+				_t = new Timer(PollPeriod)
+						{
+							AutoReset = false,
+						};
+				_t.Elapsed += TimerTick;
+				_t.Start();
 			}
 		}
 
@@ -286,6 +291,7 @@ namespace dk.CctalkLib.Devices
 			if (_t == null) return;
 			lock (_timersSyncRoot)
 			{
+				_t.Elapsed -= TimerTick;
 				_t.Dispose();
 				_t = null;
 			}
@@ -308,35 +314,40 @@ namespace dk.CctalkLib.Devices
 
 		Boolean _isResetExpected = false;
 
-		void TimerTick(object state)
+		void TimerTick(object sender, ElapsedEventArgs e)
 		{
 			lock (_timersSyncRoot)
 			{
-				var buf = _rawDev.CmdReadEventBuffer();
-
-				var wasReset = buf.Counter == 0;
-				if (wasReset)
+				try
 				{
-					if (!_isResetExpected && _lastEvent != 0)
+					var buf = _rawDev.CmdReadEventBuffer();
+
+					var wasReset = buf.Counter == 0;
+					if (wasReset)
 					{
-						BeginInvokeErrorEvent(
-							new CoinAcceptorErrorEventArgs(
-								CoinAcceptorErrors.UnspecifiedAlarmCode,
-								"Unexpected reset"
-								)
-							);
+						if (!_isResetExpected && _lastEvent != 0)
+						{
+							BeginInvokeErrorEvent(
+								new CoinAcceptorErrorEventArgs(
+									CoinAcceptorErrors.UnspecifiedAlarmCode,
+									"Unexpected reset"
+									)
+								);
+						}
 					}
+
+					_isResetExpected = false;
+					var newEventsCount = GetNewEventsCountHelper(_lastEvent, buf.Counter);
+
+					RaiseEventsByBufferHelper(buf, newEventsCount);
+
+					_lastEvent = buf.Counter;
+
+				} finally
+				{
+					if(_t!= null)
+						_t.Start();
 				}
-
-				_isResetExpected = false;
-				var newEventsCount = GetNewEventsCountHelper(_lastEvent, buf.Counter);
-
-				_lastEvent = buf.Counter;
-
-				RaiseEventsByBufferHelper(buf, newEventsCount);
-
-				_lastEvent = buf.Counter;
-
 			}
 		}
 
@@ -344,7 +355,7 @@ namespace dk.CctalkLib.Devices
 		{
 			if (newCounterVal == 0) return 0;
 
-			int newEventsCount = lastCounerVal <= newCounterVal
+			var newEventsCount = lastCounerVal <= newCounterVal
 						? newCounterVal - lastCounerVal
 						: (255 - lastCounerVal) + newCounterVal;
 
@@ -355,7 +366,7 @@ namespace dk.CctalkLib.Devices
 		{
 			if (countToShow == 0) return;
 
-			for (int i = 0; i < Math.Min(countToShow, buf.Events.Length); i++)
+			for (var i = 0; i < Math.Min(countToShow, buf.Events.Length); i++)
 			{
 				var ev = buf.Events[i];
 				if (ev.IsError)
@@ -411,8 +422,7 @@ namespace dk.CctalkLib.Devices
 					_winformsInvokeTarget.BeginInvoke(ev, new Object[] { this, ea });
 					wasCall = true;
 				}
-			} 
-			else if (_wpfInvokeTarget != null)
+			} else if (_wpfInvokeTarget != null)
 			{
 				if (!_wpfInvokeTarget.CheckAccess())
 				{
@@ -429,7 +439,7 @@ namespace dk.CctalkLib.Devices
 		{
 			Dispose(true);
 		}
-		
+
 		void Dispose(Boolean disposing)
 		{
 			UnInit();

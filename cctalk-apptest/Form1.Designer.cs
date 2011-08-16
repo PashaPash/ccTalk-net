@@ -49,6 +49,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.comNumber = new System.Windows.Forms.NumericUpDown();
+			this.cbBrute = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.contextMenuListBox.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -61,9 +62,9 @@
 			// 
 			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.button1.Location = new System.Drawing.Point(6, 101);
+			this.button1.Location = new System.Drawing.Point(6, 96);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(101, 74);
+			this.button1.Size = new System.Drawing.Size(100, 50);
 			this.button1.TabIndex = 0;
 			this.button1.Text = "Send command";
 			this.button1.UseVisualStyleBackColor = true;
@@ -72,6 +73,7 @@
 			// groupBox1
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.Controls.Add(this.cbBrute);
 			this.groupBox1.Controls.Add(this.radioButton3);
 			this.groupBox1.Controls.Add(this.radioButton2);
 			this.groupBox1.Controls.Add(this.radioButton1);
@@ -119,7 +121,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(5, 13);
+			this.label1.Location = new System.Drawing.Point(3, 13);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(66, 13);
 			this.label1.TabIndex = 2;
@@ -231,7 +233,7 @@
 			// 
 			this.deviceNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.deviceNumber.Location = new System.Drawing.Point(8, 73);
+			this.deviceNumber.Location = new System.Drawing.Point(6, 73);
 			this.deviceNumber.Name = "deviceNumber";
 			this.deviceNumber.Size = new System.Drawing.Size(100, 20);
 			this.deviceNumber.TabIndex = 1;
@@ -239,7 +241,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(7, 57);
+			this.label2.Location = new System.Drawing.Point(3, 57);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(79, 13);
 			this.label2.TabIndex = 2;
@@ -274,6 +276,18 @@
 			this.comNumber.Size = new System.Drawing.Size(100, 20);
 			this.comNumber.TabIndex = 1;
 			this.comNumber.Value = global::cctalk_apptest.Properties.Settings.Default.DefaultPortNumber;
+			// 
+			// cbBrute
+			// 
+			this.cbBrute.Appearance = System.Windows.Forms.Appearance.Button;
+			this.cbBrute.Location = new System.Drawing.Point(6, 152);
+			this.cbBrute.Name = "cbBrute";
+			this.cbBrute.Size = new System.Drawing.Size(100, 24);
+			this.cbBrute.TabIndex = 1;
+			this.cbBrute.Text = "Brute force";
+			this.cbBrute.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.cbBrute.UseVisualStyleBackColor = true;
+			this.cbBrute.CheckedChanged += new System.EventHandler(this.cbBrute_CheckedChanged);
 			// 
 			// Form1
 			// 
@@ -325,6 +339,7 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Button ready;
 		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.CheckBox cbBrute;
     }
 }
 

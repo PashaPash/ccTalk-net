@@ -115,6 +115,9 @@ namespace cctalk_apptest
 			}
 
 			listBox1.Items.Add(String.Format("Coin acceptor error: {0} ({1}, {2:X2})", e.ErrorMessage, e.Error, (Byte)e.Error));
+
+			listBox1.SelectedIndex = listBox1.Items.Count - 1;
+			//listBox1.SelectedIndex = -1;
 		}
 
 		void _ca_CoinAccepted(object sender, CoinAcceptorCoinEventArgs e)
@@ -126,6 +129,11 @@ namespace cctalk_apptest
 			}
 			_coinCounter += e.CoinValue;
 			listBox1.Items.Add(String.Format("Coin accepted: {0} ({1:X2}), path {3}. Now accepted: {2:C}", e.CoinName, e.CoinCode, _coinCounter, e.RoutePath));
+
+			listBox1.SelectedIndex = listBox1.Items.Count - 1;
+			//listBox1.SelectedIndex = -1;
+	
+			Thread.Sleep(1000);
 		}
 
 		private void button1_Click(object sender, EventArgs e)
@@ -160,44 +168,31 @@ namespace cctalk_apptest
 				{
 					var buf = c.CmdReadEventBuffer();
 
-					var newEventsCount = _lastEvent <= buf.Counter ? buf.Counter - _lastEvent : (255 - _lastEvent) + buf.Counter;
-					_lastEvent = buf.Counter;
 
-					if (newEventsCount == 0)
+					var sb = new StringBuilder();
+					sb.Append("Принято: ");
+					sb.AppendFormat("Cntr={0} Data:", buf.Counter);
+					for (int i = 0; i < buf.Events.Length; i++)
 					{
-						listBox1.Items.Add("Нет новых событий");
-					} else
-					{
-						var sb = new StringBuilder();
-						sb.Append("Принято: ");
-						for (int i = 0; i < Math.Min(newEventsCount, buf.Events.Length); i++)
-						{
-							var ev = buf.Events[i];
-							sb.AppendFormat("({0:X2} {1:X2}) ", ev.CoinCode, ev.ErrorOrRouteCode);
-						}
-
-						var eventsLost = newEventsCount - buf.Events.Length;
-
-						if (eventsLost > 0)
-						{
-							sb.AppendFormat(" Пропущено событий: {0}", eventsLost);
-						}
-
-						_lastEvent = buf.Counter;
-
-						listBox1.Items.Add(sb.ToString());
+						var ev = buf.Events[i];
+						sb.AppendFormat("({0:X2} {1:X2}) ", ev.CoinCode, ev.ErrorOrRouteCode);
 					}
 
-				} else if (radioButton2.Checked)
+					listBox1.Items.Add(sb.ToString());
+					listBox1.SelectedIndex = listBox1.Items.Count - 1;
+
+
+				}
+				else if (radioButton2.Checked)
 				{
 					var serial = c.CmdGetSerial();
 					listBox1.Items.Add(String.Format("SN: {0}", serial));
+					listBox1.SelectedIndex = listBox1.Items.Count - 1;
+
 
 				} else if (radioButton3.Checked)
 				{
 					c.CmdReset();
-					_lastEvent = 0;
-
 				}
 			} finally
 			{
@@ -207,7 +202,6 @@ namespace cctalk_apptest
 
 		}
 
-		Byte _lastEvent;
 
 		private void clearToolStripMenuItem_Click(object sender, EventArgs e)
 		{
@@ -268,6 +262,26 @@ namespace cctalk_apptest
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			Properties.Settings.Default.Save();
+		}
+
+		readonly System.Windows.Forms.Timer _brutimer = new System.Windows.Forms.Timer();
+
+		private void cbBrute_CheckedChanged(object sender, EventArgs e)
+		{
+			if(cbBrute.Checked)
+			{
+				_brutimer.Interval = 1;
+				_brutimer.Start();
+				_brutimer.Tick += _brutimer_Tick;
+			}else
+			{
+				_brutimer.Stop();
+			}
+		}
+
+		void _brutimer_Tick(object sender, EventArgs e)
+		{
+			button1_Click(sender, e);
 		}
 	}
 }
