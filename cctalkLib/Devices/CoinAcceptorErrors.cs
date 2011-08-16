@@ -1,149 +1,151 @@
 ﻿namespace dk.CctalkLib.Devices
 {
+	/// <summary>
+	///  Error codes for Coin acceptor events
+	/// </summary>
 	public enum CoinAcceptorErrors
 	{
-
-		/*Null event ( no error ) */
+		///<summary>Null event ( no error ) </summary>
 		NoError = 0,
-		/*Reject coin */
+		///<summary>Reject coin </summary>
 		RejectCoin = 1,
-		/*Inhibited coin */
+		///<summary>Inhibited coin </summary>
 		InhibitedCoin = 2,
-		/*Multiple window */
+		///<summary>Multiple window </summary>
 		MultipleWindow = 3,
-		/*Wake-up timeout */
+		///<summary>Wake-up timeout </summary>
 		WakeupTimeout = 4,
-		/*Validation timeout */
+		///<summary>Validation timeout </summary>
 		ValidationTimeout = 5,
-		/*Credit sensor timeout */
+		///<summary>Credit sensor timeout </summary>
 		CreditSensorTimeout = 6,
-		/*Sorter opto timeout */
+		///<summary>Sorter opto timeout </summary>
 		SorterOptoTimeout = 7,
-		/*2nd close coin error */
+		///<summary>2nd close coin error </summary>
 		SecondCloseCoinError = 8,
-		/*Accept gate not ready */
+		///<summary>Accept gate not ready </summary>
 		AcceptGateNotReady = 9,
-		/*Credit sensor not ready */
+		///<summary>Credit sensor not ready </summary>
 		CreditSensorNotReady = 10,
-		/*Sorter not ready */
+		///<summary>Sorter not ready </summary>
 		SorterNotReady = 11,
-		/*Reject coin not cleared */
+		///<summary>Reject coin not cleared </summary>
 		RejectCoinNotCleared = 12,
-		/*Validation sensor not ready */
+		///<summary>Validation sensor not ready </summary>
 		ValidationSensorNotReady = 13,
-		/*Credit sensor blocked */
+		///<summary>Credit sensor blocked </summary>
 		CreditSensorBlocked = 14,
-		/*Sorter opto blocked */
+		///<summary>Sorter opto blocked </summary>
 		SorterOptoBlocked = 15,
-		/*Credit sequence error */
+		///<summary>Credit sequence error </summary>
 		CreditSequenceError = 16,
-		/*Coin going backwards */
+		///<summary>Coin going backwards </summary>
 		CoinGoingBackwards = 17,
-		/*Coin too fast ( over credit sensor ) */
+		///<summary>Coin too fast ( over credit sensor ) </summary>
 		CoinTooFast = 18,
-		/*Coin too slow ( over credit sensor ) */
+		///<summary>Coin too slow ( over credit sensor ) </summary>
 		CoinTooSlow = 19,
-		/*C.O.S. mechanism activated ( coin-on-string ) */
+		///<summary>C.O.S. mechanism activated ( coin-on-string ) </summary>
 		CosActivated = 20,
-		/*DCE opto timeout */
+		///<summary>DCE opto timeout </summary>
 		DceOptoTimeout = 21,
-		/*DCE opto not seen */
+		///<summary>DCE opto not seen </summary>
 		DceOptoNotSeen = 22,
-		/*Credit sensor reached too early */
+		///<summary>Credit sensor reached too early </summary>
 		CreditSensorReachedTooEarly = 23,
-		/*Reject coin ( repeated sequential trip ) */
+		///<summary>Reject coin ( repeated sequential trip ) </summary>
 		RejectCoinRepeat = 24,
-		/*Reject slug */
+		///<summary>Reject slug </summary>
 		RejectSlug = 25,
-		/*Reject sensor blocked */
+		///<summary>Reject sensor blocked </summary>
 		RejectSensorBlocked = 26,
-		/*Games overload */
+		///<summary>Games overload </summary>
 		GamesOverload = 27,
-		/*Max. coin meter pulses exceeded */
+		///<summary>Max. coin meter pulses exceeded </summary>
 		MaxCoinMeterPulsesExceeded = 28,
-		/*Accept gate open not closed */
+		///<summary>Accept gate open not closed </summary>
 		AcceptGateOpenNotClosed = 29,
-		/*Accept gate closed not open */
+		///<summary>Accept gate closed not open </summary>
 		AcceptGateClosedNotOpen = 30,
-		/*Manifold opto timeout */
+		///<summary>Manifold opto timeout </summary>
 		ManifoldOptoTimeout = 31,
-		/*Manifold opto blocked */
+		///<summary>Manifold opto blocked </summary>
 		ManifoldOptoBlocked = 32,
-		/*Manifold not ready */
+		///<summary>Manifold not ready </summary>
 		ManifoldNotReady = 33,
-		/*Security status changed */
+		///<summary>Security status changed </summary>
 		SecurityStatusChanged = 34,
-		/*Motor exception */
+		///<summary>Motor exception </summary>
 		MotorException = 35,
-		/*Inhibited coin ( Type 1 ) */
+		///<summary>Inhibited coin ( Type 1 ) </summary>
 		InhibitedCoin01 = 128,
-		/*Inhibited coin ( Type 2 ) */
+		///<summary>Inhibited coin ( Type 2 ) </summary>
 		InhibitedCoin02 = 129,
-		/*Inhibited coin ( Type 3 ) */
+		///<summary>Inhibited coin ( Type 3 ) </summary>
 		InhibitedCoin03 = 130,
-		/*Inhibited coin ( Type 4 ) */
+		///<summary>Inhibited coin ( Type 4 ) </summary>
 		InhibitedCoin04 = 131,
-		/*Inhibited coin ( Type 5 ) */
+		///<summary>Inhibited coin ( Type 5 ) </summary>
 		InhibitedCoin05 = 132,
-		/*Inhibited coin ( Type 6 ) */
+		///<summary>Inhibited coin ( Type 6 ) </summary>
 		InhibitedCoin06 = 133,
-		/*Inhibited coin ( Type 7 ) */
+		///<summary>Inhibited coin ( Type 7 ) </summary>
 		InhibitedCoin07 = 134,
-		/*Inhibited coin ( Type 8 ) */
+		///<summary>Inhibited coin ( Type 8 ) </summary>
 		InhibitedCoin08 = 135,
-		/*Inhibited coin ( Type 9 ) */
+		///<summary>Inhibited coin ( Type 9 ) </summary>
 		InhibitedCoin09 = 136,
-		/*Inhibited coin ( Type 10 ) */
+		///<summary>Inhibited coin ( Type 10 ) </summary>
 		InhibitedCoin10 = 137,
-		/*Inhibited coin ( Type 11 ) */
+		///<summary>Inhibited coin ( Type 11 ) </summary>
 		InhibitedCoin11 = 138,
-		/*Inhibited coin ( Type 12 ) */
+		///<summary>Inhibited coin ( Type 12 ) </summary>
 		InhibitedCoin12 = 139,
-		/*Inhibited coin ( Type 13 ) */
+		///<summary>Inhibited coin ( Type 13 ) </summary>
 		InhibitedCoin13 = 140,
-		/*Inhibited coin ( Type 14 ) */
+		///<summary>Inhibited coin ( Type 14 ) </summary>
 		InhibitedCoin14 = 141,
-		/*Inhibited coin ( Type 15 ) */
+		///<summary>Inhibited coin ( Type 15 ) </summary>
 		InhibitedCoin15 = 142,
-		/*Inhibited coin ( Type 16 ) */
+		///<summary>Inhibited coin ( Type 16 ) </summary>
 		InhibitedCoin16 = 143,
-		/*Inhibited coin ( Type 17 ) */
+		///<summary>Inhibited coin ( Type 17 ) </summary>
 		InhibitedCoin17 = 144,
-		/*Inhibited coin ( Type 18 ) */
+		///<summary>Inhibited coin ( Type 18 ) </summary>
 		InhibitedCoin18 = 145,
-		/*Inhibited coin ( Type 19 ) */
+		///<summary>Inhibited coin ( Type 19 ) </summary>
 		InhibitedCoin19 = 146,
-		/*Inhibited coin ( Type 20 ) */
+		///<summary>Inhibited coin ( Type 20 ) </summary>
 		InhibitedCoin20 = 147,
-		/*Inhibited coin ( Type 21 ) */
+		///<summary>Inhibited coin ( Type 21 ) </summary>
 		InhibitedCoin21 = 148,
-		/*Inhibited coin ( Type 22 ) */
+		///<summary>Inhibited coin ( Type 22 ) </summary>
 		InhibitedCoin22 = 149,
-		/*Inhibited coin ( Type 23 ) */
+		///<summary>Inhibited coin ( Type 23 ) </summary>
 		InhibitedCoin23 = 150,
-		/*Inhibited coin ( Type 24 ) */
+		///<summary>Inhibited coin ( Type 24 ) </summary>
 		InhibitedCoin24 = 151,
-		/*Inhibited coin ( Type 25 ) */
+		///<summary>Inhibited coin ( Type 25 ) </summary>
 		InhibitedCoin25 = 152,
-		/*Inhibited coin ( Type 26 ) */
+		///<summary>Inhibited coin ( Type 26 ) </summary>
 		InhibitedCoin26 = 153,
-		/*Inhibited coin ( Type 27 ) */
+		///<summary>Inhibited coin ( Type 27 ) </summary>
 		InhibitedCoin27 = 154,
-		/*Inhibited coin ( Type 28 ) */
+		///<summary>Inhibited coin ( Type 28 ) </summary>
 		InhibitedCoin28 = 155,
-		/*Inhibited coin ( Type 29 ) */
+		///<summary>Inhibited coin ( Type 29 ) </summary>
 		InhibitedCoin29 = 156,
-		/*Inhibited coin ( Type 30 ) */
+		///<summary>Inhibited coin ( Type 30 ) </summary>
 		InhibitedCoin30 = 157,
-		/*Inhibited coin ( Type 31 ) */
+		///<summary>Inhibited coin ( Type 31 ) </summary>
 		InhibitedCoin31 = 158,
-		/*Inhibited coin ( Type 32 ) */
+		///<summary>Inhibited coin ( Type 32 ) </summary>
 		InhibitedCoin32 = 159,
-		/* Data block request ( note_α ) */
+		///<summary> Data block request ( note_α ) </summary>
 		DataBlockRequest = 253,
-		/*Coin return mechanism activated ( flight deck open ) */
+		///<summary>Coin return mechanism activated ( flight deck open ) </summary>
 		CoinReturnMechanismActivated = 254,
-		/*Unspecified alarm code */
+		///<summary>Unspecified alarm code </summary>
 		UnspecifiedAlarmCode = 255,
 	}
 }

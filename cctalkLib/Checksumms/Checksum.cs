@@ -9,12 +9,12 @@ namespace dk.CctalkLib.Checksumms
             long sum = 0L;
             byte div = 0;
 
-            for (int i = 0; i < source.Length; i++)
+            foreach (byte t in source)
             {
-                sum += source[i];
+            	sum += t;
             }
 
-            while (sum > 255)
+        	while (sum > 255)
             {
                 sum -= 256;
             }
