@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.IO.Ports;
 using dk.CctalkLib.Checksumms;
@@ -195,7 +196,7 @@ namespace dk.CctalkLib.Connections
 							}
 							break;
 						case RespondAcceptionPhase.Accepting:
-							if (tsAge > 50)
+							if (tsAge > 100)
 							{
 								_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
 								throw new TimeoutException("Pause in reply"); // TODO: no exception, just return null or invalid respond
@@ -214,18 +215,24 @@ namespace dk.CctalkLib.Connections
 			}
 		}
 
+		private readonly Stopwatch _timer = new Stopwatch();
 		void SetTimestamp()
 		{
-			_lastByteReciveTimestamp = Environment.TickCount;
+			//_lastByteReciveTimestamp = Environment.TickCount;
+			_timer.Reset();
+			_timer.Start();
 		}
 
 		Int32 GetTimestampAge()
 		{
-			return Environment.TickCount - _lastByteReciveTimestamp;
+			//return Environment.TickCount - _lastByteReciveTimestamp;
+			_timer.Stop();
+			return (Int32)_timer.ElapsedMilliseconds;
 		}
 
 		private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
+			SetTimestamp();
 			_respondAcceptionPhase = RespondAcceptionPhase.Accepting;
 
 			int bytes = _port.BytesToRead;
@@ -233,7 +240,6 @@ namespace dk.CctalkLib.Connections
 			var red = _port.Read(comBuffer, 0, bytes);
 			Array.Copy(comBuffer, 0, _respondBuf, _respondBufPos, red);
 			_respondBufPos += red;
-			SetTimestamp();
 			var isRespondComplete = GenericCctalkDevice.IsRespondComplete(_respondBuf, _respondBufPos);
 			if (isRespondComplete)
 			{
