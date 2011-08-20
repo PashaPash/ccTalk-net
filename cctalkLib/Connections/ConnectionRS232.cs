@@ -226,7 +226,7 @@ namespace dk.CctalkLib.Connections
 		Int32 GetTimestampAge()
 		{
 			//return Environment.TickCount - _lastByteReciveTimestamp;
-			_timer.Stop();
+			//_timer.Stop();
 			return (Int32)_timer.ElapsedMilliseconds;
 		}
 
