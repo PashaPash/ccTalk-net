@@ -133,13 +133,13 @@ namespace cctalk_apptest
 			listBox1.SelectedIndex = listBox1.Items.Count - 1;
 			//listBox1.SelectedIndex = -1;
 	
+			// There is simulator of long-working event handler
 			Thread.Sleep(1000);
 		}
 
 		private void button1_Click(object sender, EventArgs e)
 		{
 			// Attention! There we are creating new device object. But it could share connection with _ca.
-
 			ICctalkConnection con;
 			Boolean isMyConnection;
 
@@ -249,6 +249,8 @@ namespace cctalk_apptest
 
 		private void resetButton_Click(object sender, EventArgs e)
 		{
+			_brutimer.Stop();
+
 			DisposeCoinAcceptor();
 			cbPolling.Checked = false;
 

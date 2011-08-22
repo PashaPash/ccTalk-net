@@ -31,6 +31,7 @@
 			this.components = new System.ComponentModel.Container();
 			this.button1 = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.cbBrute = new System.Windows.Forms.CheckBox();
 			this.radioButton3 = new System.Windows.Forms.RadioButton();
 			this.radioButton2 = new System.Windows.Forms.RadioButton();
 			this.radioButton1 = new System.Windows.Forms.RadioButton();
@@ -49,7 +50,6 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.comNumber = new System.Windows.Forms.NumericUpDown();
-			this.cbBrute = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.contextMenuListBox.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -85,6 +85,18 @@
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Raw commands";
+			// 
+			// cbBrute
+			// 
+			this.cbBrute.Appearance = System.Windows.Forms.Appearance.Button;
+			this.cbBrute.Location = new System.Drawing.Point(6, 152);
+			this.cbBrute.Name = "cbBrute";
+			this.cbBrute.Size = new System.Drawing.Size(100, 24);
+			this.cbBrute.TabIndex = 1;
+			this.cbBrute.Text = "Brute force";
+			this.cbBrute.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.cbBrute.UseVisualStyleBackColor = true;
+			this.cbBrute.CheckedChanged += new System.EventHandler(this.cbBrute_CheckedChanged);
 			// 
 			// radioButton3
 			// 
@@ -276,18 +288,6 @@
 			this.comNumber.Size = new System.Drawing.Size(100, 20);
 			this.comNumber.TabIndex = 1;
 			this.comNumber.Value = global::cctalk_apptest.Properties.Settings.Default.DefaultPortNumber;
-			// 
-			// cbBrute
-			// 
-			this.cbBrute.Appearance = System.Windows.Forms.Appearance.Button;
-			this.cbBrute.Location = new System.Drawing.Point(6, 152);
-			this.cbBrute.Name = "cbBrute";
-			this.cbBrute.Size = new System.Drawing.Size(100, 24);
-			this.cbBrute.TabIndex = 1;
-			this.cbBrute.Text = "Brute force";
-			this.cbBrute.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.cbBrute.UseVisualStyleBackColor = true;
-			this.cbBrute.CheckedChanged += new System.EventHandler(this.cbBrute_CheckedChanged);
 			// 
 			// Form1
 			// 

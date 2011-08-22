@@ -15,12 +15,9 @@ namespace dk.CctalkLib.Connections
 	/// </summary>
 	public class ConnectionRs232 : ICctalkConnection
 	{
-		enum RespondAcceptionPhases
-		{
-			CommandNotSent,
-			WaitingResponseStart,
-			Accepting,
-		}
+		const Int32 RespondStartTimeout = 2000;
+		const Int32 RespondDataTimeout = 50;
+
 
 		readonly Object _callSyncRoot = new Object();
 		readonly Object _phaseSyncRoot = new Object();
@@ -30,12 +27,11 @@ namespace dk.CctalkLib.Connections
 		readonly AutoResetEvent _readWait = new AutoResetEvent(false);
 		private readonly Stopwatch _timer = new Stopwatch();
 
-		Int32 _respondBufPos;
-		ICctalkChecksum _respondChecksumChecker;
-		CctalkMessage _lastRespond;
-		RespondAcceptionPhases _respondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
 
 
+		/// <summary>
+		/// Serial baut rate
+		/// </summary>
 		public int BaudRate
 		{
 			get { return _port.BaudRate; }
@@ -72,25 +68,6 @@ namespace dk.CctalkLib.Connections
 			get { return _port.PortName; }
 			set { _port.PortName = value; }
 		}
-
-		RespondAcceptionPhases RespondAcceptionPhase
-		{
-			get
-			{
-				lock (_phaseSyncRoot)
-				{
-					return _respondAcceptionPhase;
-				}
-			}
-			set
-			{
-				lock (_phaseSyncRoot)
-				{
-
-					_respondAcceptionPhase = value;
-				}
-			}
-	}
 
 
 		public ConnectionRs232()
@@ -153,7 +130,7 @@ namespace dk.CctalkLib.Connections
 		{
 			lock (_callSyncRoot)
 			{
-				_port.DataReceived += SerialPortDataReceived;
+				//_port.DataReceived += SerialPortDataReceived;
 				_port.Open();
 				_port.DiscardInBuffer();
 				_port.DiscardOutBuffer();
@@ -168,7 +145,7 @@ namespace dk.CctalkLib.Connections
 		{
 			lock (_callSyncRoot)
 			{
-				_port.DataReceived -= SerialPortDataReceived;
+				//_port.DataReceived -= SerialPortDataReceived;
 				_port.Close();
 			}
 		}
@@ -182,104 +159,65 @@ namespace dk.CctalkLib.Connections
 			// TODO: handle BUSY message
 			lock (_callSyncRoot)
 			{
-				if (RespondAcceptionPhase != RespondAcceptionPhases.CommandNotSent)
-					throw new InvalidOperationException("Invalid cctalk connection state. " + RespondAcceptionPhase);
 
 				var msgBytes = com.GetTransferDataNoChecksumm();
 				chHandler.CalcAndApply(msgBytes);
 
-				_respondBufPos = 0;
-				_lastRespond = null;
-				_respondChecksumChecker = chHandler;
+				//_respondChecksumChecker = chHandler;
+
+				_port.DiscardInBuffer();
 
 				_port.Write(msgBytes, 0, msgBytes.Length);
 
-				RespondAcceptionPhase = RespondAcceptionPhases.WaitingResponseStart;
-				SetTimestamp();
-				while (!_readWait.WaitOne(50))
+				_port.ReadTimeout = RespondStartTimeout;
+				Int32 respondBufPos = 0;
+				CctalkMessage respond;
+				while (true)
 				{
-					/*
-					 * When receiving bytes within a message packet, the communication software should 
-					 * wait up to 50ms for another byte if it is expected. If a timeout condition occurs, the 
-					 * software should reset all communication variables and be ready to receive the next 
-					 * message. No other action should be taken. (cctalk spec part1, 11.1) 
-					 */
-
-					var tsAge = GetTimestampAge();
-					switch (RespondAcceptionPhase)
+					try
 					{
-						case RespondAcceptionPhases.WaitingResponseStart:
-							if (tsAge > 5000)
-							{
-								RespondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
-								throw new TimeoutException("No reply");
-							}
-							break;
-						case RespondAcceptionPhases.Accepting:
-							if (tsAge > 50)
-							{
-								RespondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
-								throw new TimeoutException("Pause in reply"); // TODO: no exception, just return null or invalid respond
-							}
-							break;
+						var b = (Byte)_port.ReadByte();
+						_port.ReadTimeout = RespondDataTimeout;
 
+						_respondBuf[respondBufPos] = b;
+						respondBufPos++;
+
+						var isRespondComplete = GenericCctalkDevice.IsRespondComplete(_respondBuf, respondBufPos);
+						if (isRespondComplete)
+						{
+							if (!chHandler.Check(_respondBuf, 0, respondBufPos))
+							{
+								var copy = new byte[respondBufPos];
+								Array.Copy(_respondBuf, copy, respondBufPos);
+								throw new InvalidResondFormatException(copy, "Checksumm check fail");
+							}
+							respond = GenericCctalkDevice.ParseRespond(_respondBuf, 0, respondBufPos);
+							Array.Clear(_respondBuf, 0, _respondBuf.Length);
+							break;
+						}
+
+					} catch (TimeoutException ex)
+					{
+						if (_port.ReadTimeout == RespondStartTimeout)
+							throw new TimeoutException("Device not respondng", ex);
+
+						throw new TimeoutException("Pause in reply", ex);
 
 					}
-					//if (tsAge > 50) throw new TimeoutException("No reply");
 				}
 
-				_respondChecksumChecker = null;
-				RespondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
+				return respond;
 
-				return _lastRespond;
+
+				/*
+				 * When receiving bytes within a message packet, the communication software should 
+				 * wait up to 50ms for another byte if it is expected. If a timeout condition occurs, the 
+				 * software should reset all communication variables and be ready to receive the next 
+				 * message. No other action should be taken. (cctalk spec part1, 11.1) 
+				 */
+
 			}
 		}
-
-		void SetTimestamp()
-		{
-			//_lastByteReciveTimestamp = Environment.TickCount;
-			_timer.Reset();
-			_timer.Start();
-		}
-
-		Int32 GetTimestampAge()
-		{
-			//return Environment.TickCount - _lastByteReciveTimestamp;
-			//_timer.Stop();
-			return (Int32)_timer.ElapsedMilliseconds;
-		}
-
-		private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
-		{
-			SetTimestamp();
-			if (RespondAcceptionPhase == RespondAcceptionPhases.CommandNotSent)
-				return;
-
-			if(RespondAcceptionPhase == RespondAcceptionPhases.WaitingResponseStart)
-				RespondAcceptionPhase = RespondAcceptionPhases.Accepting;
-
-			int bytes = _port.BytesToRead;
-			var comBuffer = new byte[bytes];
-			var red = _port.Read(comBuffer, 0, bytes);
-			Array.Copy(comBuffer, 0, _respondBuf, _respondBufPos, red);
-			_respondBufPos += red;
-			var isRespondComplete = GenericCctalkDevice.IsRespondComplete(_respondBuf, _respondBufPos);
-			if (isRespondComplete)
-			{
-				if (!_respondChecksumChecker.Check(_respondBuf, 0, _respondBufPos))
-				{
-					var copy = new byte[_respondBufPos];
-					Array.Copy(_respondBuf, copy, _respondBufPos);
-					throw new InvalidResondFormatException(copy, "Checksumm check fail");
-				}
-				_lastRespond = GenericCctalkDevice.ParseRespond(_respondBuf, 0, _respondBufPos);
-				Array.Clear(_respondBuf, 0, _respondBuf.Length);
-				_respondBufPos = 0;
-				_readWait.Set();
-			}
-		}
-
-
 
 		#endregion
 

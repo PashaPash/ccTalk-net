@@ -274,6 +274,8 @@ namespace dk.CctalkLib.Devices
 		public static Boolean IsRespondComplete(Byte[] respondRawData, Int32 lengthOverride)
 		{
 			if (lengthOverride <= 4) return false;
+			if (lengthOverride > 255) return true;
+
 			var expectedLen = GetExpectedLength(respondRawData);
 			return expectedLen == lengthOverride;
 		}
