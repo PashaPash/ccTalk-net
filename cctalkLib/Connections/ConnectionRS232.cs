@@ -162,7 +162,7 @@ namespace dk.CctalkLib.Connections
 			lock (_callSyncRoot)
 			{
 				if (_respondAcceptionPhase != RespondAcceptionPhase.CommandNotSent)
-					throw new InvalidOperationException();
+					throw new InvalidOperationException("Invalid cctalk connection state. " + _respondAcceptionPhase);
 
 				var msgBytes = com.GetTransferDataNoChecksumm();
 				chHandler.CalcAndApply(msgBytes);
