@@ -15,24 +15,25 @@ namespace dk.CctalkLib.Connections
 	/// </summary>
 	public class ConnectionRs232 : ICctalkConnection
 	{
-		enum RespondAcceptionPhase
+		enum RespondAcceptionPhases
 		{
 			CommandNotSent,
 			WaitingResponseStart,
 			Accepting,
 		}
 
+		readonly Object _callSyncRoot = new Object();
+		readonly Object _phaseSyncRoot = new Object();
 
 		readonly SerialPort _port = new SerialPort();
 		readonly Byte[] _respondBuf = new byte[255];
 		readonly AutoResetEvent _readWait = new AutoResetEvent(false);
-		readonly Object _callSyncRoot = new object();
+		private readonly Stopwatch _timer = new Stopwatch();
 
 		Int32 _respondBufPos;
 		ICctalkChecksum _respondChecksumChecker;
 		CctalkMessage _lastRespond;
-		Int32 _lastByteReciveTimestamp;
-		RespondAcceptionPhase _respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
+		RespondAcceptionPhases _respondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
 
 
 		public int BaudRate
@@ -72,6 +73,24 @@ namespace dk.CctalkLib.Connections
 			set { _port.PortName = value; }
 		}
 
+		RespondAcceptionPhases RespondAcceptionPhase
+		{
+			get
+			{
+				lock (_phaseSyncRoot)
+				{
+					return _respondAcceptionPhase;
+				}
+			}
+			set
+			{
+				lock (_phaseSyncRoot)
+				{
+
+					_respondAcceptionPhase = value;
+				}
+			}
+	}
 
 
 		public ConnectionRs232()
@@ -136,6 +155,8 @@ namespace dk.CctalkLib.Connections
 			{
 				_port.DataReceived += SerialPortDataReceived;
 				_port.Open();
+				_port.DiscardInBuffer();
+				_port.DiscardOutBuffer();
 				IsOpen();
 			}
 		}
@@ -161,8 +182,8 @@ namespace dk.CctalkLib.Connections
 			// TODO: handle BUSY message
 			lock (_callSyncRoot)
 			{
-				if (_respondAcceptionPhase != RespondAcceptionPhase.CommandNotSent)
-					throw new InvalidOperationException("Invalid cctalk connection state. " + _respondAcceptionPhase);
+				if (RespondAcceptionPhase != RespondAcceptionPhases.CommandNotSent)
+					throw new InvalidOperationException("Invalid cctalk connection state. " + RespondAcceptionPhase);
 
 				var msgBytes = com.GetTransferDataNoChecksumm();
 				chHandler.CalcAndApply(msgBytes);
@@ -171,10 +192,9 @@ namespace dk.CctalkLib.Connections
 				_lastRespond = null;
 				_respondChecksumChecker = chHandler;
 
-
 				_port.Write(msgBytes, 0, msgBytes.Length);
 
-				_respondAcceptionPhase = RespondAcceptionPhase.WaitingResponseStart;
+				RespondAcceptionPhase = RespondAcceptionPhases.WaitingResponseStart;
 				SetTimestamp();
 				while (!_readWait.WaitOne(50))
 				{
@@ -186,19 +206,19 @@ namespace dk.CctalkLib.Connections
 					 */
 
 					var tsAge = GetTimestampAge();
-					switch (_respondAcceptionPhase)
+					switch (RespondAcceptionPhase)
 					{
-						case RespondAcceptionPhase.WaitingResponseStart:
+						case RespondAcceptionPhases.WaitingResponseStart:
 							if (tsAge > 5000)
 							{
-								_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
+								RespondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
 								throw new TimeoutException("No reply");
 							}
 							break;
-						case RespondAcceptionPhase.Accepting:
+						case RespondAcceptionPhases.Accepting:
 							if (tsAge > 50)
 							{
-								_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
+								RespondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
 								throw new TimeoutException("Pause in reply"); // TODO: no exception, just return null or invalid respond
 							}
 							break;
@@ -209,13 +229,12 @@ namespace dk.CctalkLib.Connections
 				}
 
 				_respondChecksumChecker = null;
-				_respondAcceptionPhase = RespondAcceptionPhase.CommandNotSent;
+				RespondAcceptionPhase = RespondAcceptionPhases.CommandNotSent;
 
 				return _lastRespond;
 			}
 		}
 
-		private readonly Stopwatch _timer = new Stopwatch();
 		void SetTimestamp()
 		{
 			//_lastByteReciveTimestamp = Environment.TickCount;
@@ -233,7 +252,11 @@ namespace dk.CctalkLib.Connections
 		private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			SetTimestamp();
-			_respondAcceptionPhase = RespondAcceptionPhase.Accepting;
+			if (RespondAcceptionPhase == RespondAcceptionPhases.CommandNotSent)
+				return;
+
+			if(RespondAcceptionPhase == RespondAcceptionPhases.WaitingResponseStart)
+				RespondAcceptionPhase = RespondAcceptionPhases.Accepting;
 
 			int bytes = _port.BytesToRead;
 			var comBuffer = new byte[bytes];
