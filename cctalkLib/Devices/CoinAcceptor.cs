@@ -292,6 +292,7 @@ namespace dk.CctalkLib.Devices
 			lock (_timersSyncRoot)
 			{
 				_t.Elapsed -= TimerTick;
+				_t.Stop();
 				_t.Dispose();
 				_t = null;
 			}
@@ -343,7 +344,7 @@ namespace dk.CctalkLib.Devices
 		{
 			lock (_timersSyncRoot)
 			{
-				if(_t == null) return;
+				//if(_t == null) return;
 				try
 				{
 					var buf = _rawDev.CmdReadEventBuffer();
