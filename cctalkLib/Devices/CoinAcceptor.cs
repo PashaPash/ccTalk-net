@@ -169,8 +169,7 @@ namespace dk.CctalkLib.Devices
 
 			if (!ignoreLastEvents)
 			{
-				var newEv = GetNewEventsCountHelper(_lastEvent, evBuf.Counter);
-				RaiseEventsByBufferHelper(evBuf, newEv);
+				RaiseLastEvents(evBuf);
 			}
 			_lastEvent = evBuf.Counter;
 
@@ -369,18 +368,21 @@ namespace dk.CctalkLib.Devices
 					}
 
 					_isResetExpected = false;
-					var newEventsCount = GetNewEventsCountHelper(_lastEvent, buf.Counter);
 
-					RaiseEventsByBufferHelper(buf, newEventsCount);
-
-					_lastEvent = buf.Counter;
-
+					RaiseLastEvents(buf);
 				} finally
 				{
 					if (_t != null && ReferenceEquals(sender, _t))
 						_t.Start();
 				}
 			}
+		}
+
+		private void RaiseLastEvents(DeviceEventBuffer buf)
+		{
+			var newEventsCount = GetNewEventsCountHelper(_lastEvent, buf.Counter);
+			_lastEvent = buf.Counter;
+			RaiseEventsByBufferHelper(buf, newEventsCount);
 		}
 
 		static Byte GetNewEventsCountHelper(Byte lastCounerVal, Byte newCounterVal)
