@@ -14,7 +14,7 @@ namespace dk.CctalkLib.Devices
 	/// </summary>
 	public class CoinAcceptor : IDisposable
 	{
-		const Int32 PollPeriod = 1000;
+		const Int32 PollPeriod = 300;
 
 		readonly GenericCctalkDevice _rawDev = new GenericCctalkDevice();
 		readonly ISynchronizeInvoke _winformsInvokeTarget;
@@ -312,12 +312,38 @@ namespace dk.CctalkLib.Devices
 			}
 		}
 
-		Boolean _isResetExpected = false;
 
-		void TimerTick(object sender, ElapsedEventArgs e)
+		/// <summary>
+		/// Remembers current state of device`s event buffer as empty.
+		/// All unread events in buffer will be discarded.
+		/// </summary>
+		public void ClearEventBuffer()
 		{
 			lock (_timersSyncRoot)
 			{
+				_isClearEventBufferRequested = true;
+			}
+		}
+
+		/// <summary>
+		/// Immediately executes poll process in blocking mode.
+		/// All usual polling events will fire at calling thread.
+		/// </summary>
+		public void PollNow()
+		{
+			TimerTick(this, EventArgs.Empty);
+		}
+
+		Boolean _isResetExpected = false;
+		Boolean _isClearEventBufferRequested = false;
+
+
+
+		void TimerTick(object sender, EventArgs e)
+		{
+			lock (_timersSyncRoot)
+			{
+				if(_t == null) return;
 				try
 				{
 					var buf = _rawDev.CmdReadEventBuffer();
@@ -336,6 +362,11 @@ namespace dk.CctalkLib.Devices
 						}
 					}
 
+					if (_isClearEventBufferRequested)
+					{
+						_lastEvent = buf.Counter;
+					}
+
 					_isResetExpected = false;
 					var newEventsCount = GetNewEventsCountHelper(_lastEvent, buf.Counter);
 
@@ -345,7 +376,7 @@ namespace dk.CctalkLib.Devices
 
 				} finally
 				{
-					if(_t!= null)
+					if (_t != null && ReferenceEquals(sender, _t))
 						_t.Start();
 				}
 			}

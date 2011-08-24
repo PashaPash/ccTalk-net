@@ -285,5 +285,11 @@ namespace cctalk_apptest
 		{
 			button1_Click(sender, e);
 		}
+
+		private void butPollNow_Click(object sender, EventArgs e)
+		{
+			if(_ca == null) return;
+			_ca.PollNow();
+		}
 	}
 }

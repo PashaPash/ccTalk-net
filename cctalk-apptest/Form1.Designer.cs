@@ -42,7 +42,7 @@
 			this.clearMoneyCounterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cbPolling = new System.Windows.Forms.CheckBox();
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.ready = new System.Windows.Forms.Button();
+			this.butReady = new System.Windows.Forms.Button();
 			this.cbInhibit = new System.Windows.Forms.CheckBox();
 			this.initButton = new System.Windows.Forms.Button();
 			this.resetButton = new System.Windows.Forms.Button();
@@ -50,6 +50,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.comNumber = new System.Windows.Forms.NumericUpDown();
+			this.butPollNow = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.contextMenuListBox.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -188,7 +189,8 @@
 			// 
 			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.panel1.Controls.Add(this.ready);
+			this.panel1.Controls.Add(this.butPollNow);
+			this.panel1.Controls.Add(this.butReady);
 			this.panel1.Controls.Add(this.cbInhibit);
 			this.panel1.Controls.Add(this.cbPolling);
 			this.panel1.Enabled = false;
@@ -197,15 +199,15 @@
 			this.panel1.Size = new System.Drawing.Size(441, 86);
 			this.panel1.TabIndex = 5;
 			// 
-			// ready
+			// butReady
 			// 
-			this.ready.Location = new System.Drawing.Point(3, 47);
-			this.ready.Name = "ready";
-			this.ready.Size = new System.Drawing.Size(75, 36);
-			this.ready.TabIndex = 5;
-			this.ready.Text = "Ready?";
-			this.ready.UseVisualStyleBackColor = true;
-			this.ready.Click += new System.EventHandler(this.ready_Click);
+			this.butReady.Location = new System.Drawing.Point(3, 47);
+			this.butReady.Name = "butReady";
+			this.butReady.Size = new System.Drawing.Size(75, 36);
+			this.butReady.TabIndex = 5;
+			this.butReady.Text = "Ready?";
+			this.butReady.UseVisualStyleBackColor = true;
+			this.butReady.Click += new System.EventHandler(this.ready_Click);
 			// 
 			// cbInhibit
 			// 
@@ -289,6 +291,16 @@
 			this.comNumber.TabIndex = 1;
 			this.comNumber.Value = global::cctalk_apptest.Properties.Settings.Default.DefaultPortNumber;
 			// 
+			// butPollNow
+			// 
+			this.butPollNow.Location = new System.Drawing.Point(84, 48);
+			this.butPollNow.Name = "butPollNow";
+			this.butPollNow.Size = new System.Drawing.Size(75, 36);
+			this.butPollNow.TabIndex = 5;
+			this.butPollNow.Text = "Poll now";
+			this.butPollNow.UseVisualStyleBackColor = true;
+			this.butPollNow.Click += new System.EventHandler(this.butPollNow_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -337,9 +349,10 @@
 		private System.Windows.Forms.Button resetButton;
 		private System.Windows.Forms.NumericUpDown deviceNumber;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Button ready;
+		private System.Windows.Forms.Button butReady;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.CheckBox cbBrute;
+		private System.Windows.Forms.Button butPollNow;
     }
 }
 
