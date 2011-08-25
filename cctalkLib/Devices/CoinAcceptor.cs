@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Timers;
-using System.Windows.Threading;
 using dk.CctalkLib.Connections;
 
 namespace dk.CctalkLib.Devices
@@ -17,8 +15,6 @@ namespace dk.CctalkLib.Devices
 		const Int32 PollPeriod = 300;
 
 		readonly GenericCctalkDevice _rawDev = new GenericCctalkDevice();
-		readonly ISynchronizeInvoke _winformsInvokeTarget;
-		readonly DispatcherObject _wpfInvokeTarget;
 
 		Timer _t;
 		Byte _lastEvent;
@@ -41,68 +37,6 @@ namespace dk.CctalkLib.Devices
 		readonly Dictionary<Byte, CoinTypeInfo> _coins = new Dictionary<Byte, CoinTypeInfo>();
 
 		#region Constructors
-		CoinAcceptor(
-			Byte addr,
-			ICctalkConnection configuredConnection,
-			Dictionary<Byte, CoinTypeInfo> coins,
-			Dictionary<Byte, String> errorNames,
-			ISynchronizeInvoke winformsInvokeTarget,
-			DispatcherObject wpfInvokeTarget
-			)
-		{
-			if (configuredConnection == null) throw new ArgumentNullException("configuredConnection");
-
-			_rawDev.Connection = configuredConnection;
-			_rawDev.Address = addr;
-			_winformsInvokeTarget = winformsInvokeTarget;
-			_wpfInvokeTarget = wpfInvokeTarget;
-
-			if (errorNames != null)
-				foreach (var error in errorNames)
-					_errors[error.Key] = error.Value;
-
-			if (coins != null)
-				foreach (var coin in coins)
-					_coins[coin.Key] = coin.Value;
-		}
-
-		/// <summary>
-		/// Creates instance of CoinAcceptor and sets up WinForms invoking
-		/// </summary>
-		/// <param name="addr">Device ccTalk address. 0 - broadcast</param>
-		/// <param name="configuredConnection">Connection to work. Sharing connection between seweral device object not recommended and not supported. But can work :)</param>
-		/// <param name="coins">data for resolving coin codes to coin values and names. Depends on device firmware. Can be found on device case.</param>
-		/// <param name="errorNames">overriding for error nemes</param>
-		/// <param name="winformsInvokeTarget">Form or other Windows.Forms control, that wil handle invoking into WinForms App</param>
-		public CoinAcceptor(
-			Byte addr,
-			ICctalkConnection configuredConnection,
-			Dictionary<Byte, CoinTypeInfo> coins,
-			Dictionary<Byte, String> errorNames,
-			ISynchronizeInvoke winformsInvokeTarget
-			)
-			: this(addr, configuredConnection, coins, errorNames, winformsInvokeTarget, null)
-		{
-		}
-
-		/// <summary>
-		/// Creates instance of CoinAcceptor and sets up WPF invoking
-		/// </summary>
-		/// <param name="addr">Device ccTalk address. 0 - broadcast</param>
-		/// <param name="configuredConnection">Connection to work. Sharing connection between seweral device object not recommended and not supported. But can work :)</param>
-		/// <param name="coins">data for resolving coin codes to coin values and names. Depends on device firmware. Can be found on device case.</param>
-		/// <param name="errorNames">overriding for error nemes</param>
-		/// <param name="wpfInvokeTarget">WPF control, which will handle WPF invoking</param>
-		public CoinAcceptor(
-			Byte addr,
-			ICctalkConnection configuredConnection,
-			Dictionary<Byte, CoinTypeInfo> coins,
-			Dictionary<Byte, String> errorNames,
-			DispatcherObject wpfInvokeTarget
-			)
-			: this(addr, configuredConnection, coins, errorNames, null, wpfInvokeTarget)
-		{
-		}
 
 		/// <summary>
 		/// Creates instance of CoinAcceptor without invoking
@@ -117,8 +51,19 @@ namespace dk.CctalkLib.Devices
 			Dictionary<Byte, CoinTypeInfo> coins,
 			Dictionary<Byte, String> errorNames
 			)
-			: this(addr, configuredConnection, coins, errorNames, null, null)
 		{
+			if (configuredConnection == null) throw new ArgumentNullException("configuredConnection");
+
+			_rawDev.Connection = configuredConnection;
+			_rawDev.Address = addr;
+
+			if (errorNames != null)
+				foreach (var error in errorNames)
+					_errors[error.Key] = error.Value;
+
+			if (coins != null)
+				foreach (var coin in coins)
+					_coins[coin.Key] = coin.Value;
 		}
 
 		/// <summary>
@@ -130,9 +75,10 @@ namespace dk.CctalkLib.Devices
 			Byte addr,
 			ICctalkConnection configuredConnection
 			)
-			: this(addr, configuredConnection, null, null, null, null)
+			: this(addr, configuredConnection, null, null)
 		{
 		}
+
 		#endregion
 
 
@@ -353,7 +299,7 @@ namespace dk.CctalkLib.Devices
 					{
 						if (!_isResetExpected && _lastEvent != 0)
 						{
-							BeginInvokeErrorEvent(
+							RaiseInvokeErrorEvent(
 								new CoinAcceptorErrorEventArgs(
 									CoinAcceptorErrors.UnspecifiedAlarmCode,
 									"Unexpected reset"
@@ -408,7 +354,7 @@ namespace dk.CctalkLib.Devices
 					String errMsg;
 					var errCode = (CoinAcceptorErrors)ev.ErrorOrRouteCode;
 					_errors.TryGetValue(ev.ErrorOrRouteCode, out errMsg);
-					BeginInvokeErrorEvent(new CoinAcceptorErrorEventArgs(errCode, errMsg));
+					RaiseInvokeErrorEvent(new CoinAcceptorErrorEventArgs(errCode, errMsg));
 
 				} else
 				{
@@ -416,7 +362,7 @@ namespace dk.CctalkLib.Devices
 					_coins.TryGetValue(ev.CoinCode, out coinInfo);
 					var evVal = coinInfo == null ? 0 : coinInfo.Value;
 					var evName = coinInfo == null ? null : coinInfo.Name;
-					BeginInvokeCoinEvent(new CoinAcceptorCoinEventArgs(evName, evVal, ev.CoinCode, ev.ErrorOrRouteCode));
+					RaiseInvokeCoinEvent(new CoinAcceptorCoinEventArgs(evName, evVal, ev.CoinCode, ev.ErrorOrRouteCode));
 				}
 			}
 
@@ -424,50 +370,27 @@ namespace dk.CctalkLib.Devices
 
 			if (eventsLost > 0)
 			{
-				BeginInvokeErrorEvent(new CoinAcceptorErrorEventArgs(CoinAcceptorErrors.UnspecifiedAlarmCode,
+				RaiseInvokeErrorEvent(new CoinAcceptorErrorEventArgs(CoinAcceptorErrors.UnspecifiedAlarmCode,
 																	 "Events lost:" + eventsLost));
 			}
 
 
 		}
 
-		void BeginInvokeErrorEvent(CoinAcceptorErrorEventArgs ea)
+		void RaiseInvokeErrorEvent(CoinAcceptorErrorEventArgs ea)
 		{
-			BeginInvokeEvent(ErrorMessageAccepted, ea);
+			if (CoinAccepted != null)
+				ErrorMessageAccepted(this, ea);
 
 		}
 
 
-		void BeginInvokeCoinEvent(CoinAcceptorCoinEventArgs ea)
+		void RaiseInvokeCoinEvent(CoinAcceptorCoinEventArgs ea)
 		{
-			BeginInvokeEvent(CoinAccepted, ea);
+			if (CoinAccepted != null)
+				CoinAccepted(this, ea);
 		}
 
-
-		void BeginInvokeEvent(Delegate ev, EventArgs ea)
-		{
-			if (ev == null) return;
-
-			bool wasCall = false;
-			if (_winformsInvokeTarget != null)
-			{
-				if (_winformsInvokeTarget.InvokeRequired)
-				{
-					_winformsInvokeTarget.BeginInvoke(ev, new Object[] { this, ea });
-					wasCall = true;
-				}
-			} else if (_wpfInvokeTarget != null)
-			{
-				if (!_wpfInvokeTarget.CheckAccess())
-				{
-					_wpfInvokeTarget.Dispatcher.BeginInvoke(ev, this, ea);
-					wasCall = true;
-				}
-			}
-
-			if (!wasCall)
-				ev.DynamicInvoke(this, ea);
-		}
 
 		public void Dispose()
 		{

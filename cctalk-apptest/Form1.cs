@@ -61,9 +61,8 @@ namespace cctalk_apptest
 						{13, new CoinTypeInfo("2 rubles", 2M)},
 						{14, new CoinTypeInfo("5 rubles", 5M)},
 						{15, new CoinTypeInfo("10 ruble", 10M)},
-					},
-				null,
-				null as ISynchronizeInvoke /*this*/
+					}, 
+					null
 				);
 
 			_ca.CoinAccepted += _ca_CoinAccepted;
