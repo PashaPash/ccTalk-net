@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -257,7 +255,7 @@ namespace cctalk_apptest
 
 		private void ready_Click(object sender, EventArgs e)
 		{
-			MessageBox.Show("IsReady = " + _ca.IsReady, Text);
+			MessageBox.Show("GetStatus = " + _ca.GetStatus(), Text);
 		}
 
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)

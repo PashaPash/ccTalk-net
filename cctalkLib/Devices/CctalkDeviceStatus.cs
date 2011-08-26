@@ -18,6 +18,11 @@
 		/// <summary>
 		/// C.O.S. mechanism activated ( coin-on-string ) 
 		/// </summary>
-		Cos = 2
+		Cos = 2,
+
+		/// <summary>
+		/// Unknown error or invalid call
+		/// </summary>
+		OtherError = 255,
 	}
 }

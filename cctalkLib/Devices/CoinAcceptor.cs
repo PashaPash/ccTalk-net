@@ -148,7 +148,7 @@ namespace dk.CctalkLib.Devices
 		public Byte Address { get { return _rawDev.Address; } }
 
 		/// <summary>
-		///  Is polling is running now. Commands (as IsReady) CAN be sent while polling.
+		///  Is polling is running now. Commands (as GetStatus) CAN be sent while polling.
 		/// </summary>
 		public Boolean IsPolling { get { return _t != null; } }
 
@@ -248,14 +248,11 @@ namespace dk.CctalkLib.Devices
 		///  Polls the device immediatly. Returns true if device is ready. 
 		///  There is no need in calling this method when devise is polled.
 		/// </summary>
-		public bool IsReady
+		public CctalkDeviceStatus GetStatus()
 		{
-			get
-			{
-				if (!IsInitialized) return false;
-				var status = _rawDev.CmdRequestStatus();
-				return status == CctalkDeviceStatus.Ok;
-			}
+			if (!IsInitialized) return CctalkDeviceStatus.OtherError;
+			var status = _rawDev.CmdRequestStatus();
+			return status;
 		}
 
 
