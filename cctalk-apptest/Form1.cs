@@ -16,6 +16,8 @@ namespace cctalk_apptest
 		public Form1()
 		{
 			InitializeComponent();
+			configWord.Text = CoinAcceptor.ConfigWord(CoinAcceptor.DefaultConfig);
+
 		}
 
 		private void TryCreateCoinAcceptor()
@@ -43,23 +45,19 @@ namespace cctalk_apptest
 							PortName = GetCom(),
 						};
 
+			Dictionary<byte, CoinTypeInfo> coins;
+			if (!CoinAcceptor.TryParseConfigWord(configWord.Text, out coins))
+			{
+				MessageBox.Show("Wrong config word, using defaults");
+
+				coins = CoinAcceptor.DefaultConfig;
+				configWord.Text = CoinAcceptor.ConfigWord(CoinAcceptor.DefaultConfig);
+			}
+
 			_ca = new CoinAcceptor(
 				Convert.ToByte(deviceNumber.Value),
 				con,
-				new Dictionary<byte, CoinTypeInfo>
-					{
-						{5, new CoinTypeInfo("50kNew", 0.5M)},
-						{6, new CoinTypeInfo("1 R new", 1M)},
-						{7, new CoinTypeInfo("2 R new", 2M)},
-						{8, new CoinTypeInfo("5 R new", 5M)},
-						{9, new CoinTypeInfo("10 R new", 10M)},
-
-						{11, new CoinTypeInfo("50 kopec", 0.5M)},
-						{12, new CoinTypeInfo("1 rubles", 1M)},
-						{13, new CoinTypeInfo("2 rubles", 2M)},
-						{14, new CoinTypeInfo("5 rubles", 5M)},
-						{15, new CoinTypeInfo("10 ruble", 10M)},
-					}, 
+				coins,
 					null
 				);
 
@@ -73,7 +71,7 @@ namespace cctalk_apptest
 
 			initButton.Enabled = false;
 			resetButton.Enabled = true;
-
+			configWord.Enabled = false;
 		}
 
 		private void DisposeCoinAcceptor()
@@ -95,6 +93,7 @@ namespace cctalk_apptest
 			panel1.Enabled = false;
 			initButton.Enabled = true;
 			resetButton.Enabled = false;
+			configWord.Enabled = true;
 		}
 
 

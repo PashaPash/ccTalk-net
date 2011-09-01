@@ -42,6 +42,7 @@
 			this.clearMoneyCounterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cbPolling = new System.Windows.Forms.CheckBox();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.butPollNow = new System.Windows.Forms.Button();
 			this.butReady = new System.Windows.Forms.Button();
 			this.cbInhibit = new System.Windows.Forms.CheckBox();
 			this.initButton = new System.Windows.Forms.Button();
@@ -50,7 +51,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.comNumber = new System.Windows.Forms.NumericUpDown();
-			this.butPollNow = new System.Windows.Forms.Button();
+			this.configWord = new System.Windows.Forms.TextBox();
 			this.groupBox1.SuspendLayout();
 			this.contextMenuListBox.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -80,7 +81,7 @@
 			this.groupBox1.Controls.Add(this.radioButton1);
 			this.groupBox1.Controls.Add(this.button1);
 			this.groupBox1.Enabled = false;
-			this.groupBox1.Location = new System.Drawing.Point(459, 12);
+			this.groupBox1.Location = new System.Drawing.Point(449, 12);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(113, 181);
 			this.groupBox1.TabIndex = 2;
@@ -149,7 +150,7 @@
 			this.listBox1.FormattingEnabled = true;
 			this.listBox1.Location = new System.Drawing.Point(12, 12);
 			this.listBox1.Name = "listBox1";
-			this.listBox1.Size = new System.Drawing.Size(441, 433);
+			this.listBox1.Size = new System.Drawing.Size(431, 407);
 			this.listBox1.TabIndex = 3;
 			// 
 			// contextMenuListBox
@@ -194,10 +195,20 @@
 			this.panel1.Controls.Add(this.cbInhibit);
 			this.panel1.Controls.Add(this.cbPolling);
 			this.panel1.Enabled = false;
-			this.panel1.Location = new System.Drawing.Point(12, 464);
+			this.panel1.Location = new System.Drawing.Point(12, 484);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(441, 86);
+			this.panel1.Size = new System.Drawing.Size(431, 86);
 			this.panel1.TabIndex = 5;
+			// 
+			// butPollNow
+			// 
+			this.butPollNow.Location = new System.Drawing.Point(84, 48);
+			this.butPollNow.Name = "butPollNow";
+			this.butPollNow.Size = new System.Drawing.Size(75, 36);
+			this.butPollNow.TabIndex = 5;
+			this.butPollNow.Text = "Poll now";
+			this.butPollNow.UseVisualStyleBackColor = true;
+			this.butPollNow.Click += new System.EventHandler(this.butPollNow_Click);
 			// 
 			// butReady
 			// 
@@ -223,7 +234,7 @@
 			// initButton
 			// 
 			this.initButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.initButton.Location = new System.Drawing.Point(465, 464);
+			this.initButton.Location = new System.Drawing.Point(455, 484);
 			this.initButton.Name = "initButton";
 			this.initButton.Size = new System.Drawing.Size(100, 41);
 			this.initButton.TabIndex = 6;
@@ -235,7 +246,7 @@
 			// 
 			this.resetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.resetButton.Enabled = false;
-			this.resetButton.Location = new System.Drawing.Point(465, 511);
+			this.resetButton.Location = new System.Drawing.Point(455, 531);
 			this.resetButton.Name = "resetButton";
 			this.resetButton.Size = new System.Drawing.Size(100, 39);
 			this.resetButton.TabIndex = 6;
@@ -268,7 +279,7 @@
 			this.groupBox2.Controls.Add(this.deviceNumber);
 			this.groupBox2.Controls.Add(this.label1);
 			this.groupBox2.Controls.Add(this.label2);
-			this.groupBox2.Location = new System.Drawing.Point(459, 193);
+			this.groupBox2.Location = new System.Drawing.Point(449, 193);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(113, 100);
 			this.groupBox2.TabIndex = 7;
@@ -291,21 +302,23 @@
 			this.comNumber.TabIndex = 1;
 			this.comNumber.Value = global::cctalk_apptest.Properties.Settings.Default.DefaultPortNumber;
 			// 
-			// butPollNow
+			// configWord
 			// 
-			this.butPollNow.Location = new System.Drawing.Point(84, 48);
-			this.butPollNow.Name = "butPollNow";
-			this.butPollNow.Size = new System.Drawing.Size(75, 36);
-			this.butPollNow.TabIndex = 5;
-			this.butPollNow.Text = "Poll now";
-			this.butPollNow.UseVisualStyleBackColor = true;
-			this.butPollNow.Click += new System.EventHandler(this.butPollNow_Click);
+			this.configWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.configWord.Location = new System.Drawing.Point(12, 425);
+			this.configWord.Multiline = true;
+			this.configWord.Name = "configWord";
+			this.configWord.Size = new System.Drawing.Size(553, 53);
+			this.configWord.TabIndex = 8;
+			this.configWord.Text = "2=5;Rub,";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(584, 562);
+			this.ClientSize = new System.Drawing.Size(574, 582);
+			this.Controls.Add(this.configWord);
 			this.Controls.Add(this.resetButton);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.initButton);
@@ -326,6 +339,7 @@
 			this.groupBox2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.comNumber)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
         }
 
@@ -353,6 +367,7 @@
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.CheckBox cbBrute;
 		private System.Windows.Forms.Button butPollNow;
+		private System.Windows.Forms.TextBox configWord;
     }
 }
 

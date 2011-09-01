@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using System.Timers;
 using dk.CctalkLib.Connections;
 
@@ -398,6 +400,78 @@ namespace dk.CctalkLib.Devices
 		{
 			UnInit();
 		}
+
+		/// <summary>
+		/// bulids correct config word from coins
+		/// config word structure:
+		/// {coin byre code}={coin value}={coin name};
+		///                 ^ splitter   ^ splitter  ^entry splitter
+		/// </summary>
+		/// <param name="coins">configuration to build the config word</param>
+		/// <returns>config word itself</returns>
+		public static string  ConfigWord(Dictionary<byte, CoinTypeInfo> coins)
+		{
+			var sb = new StringBuilder();
+			foreach (var coin in coins)
+			{
+				sb.AppendFormat("{0}={1}={2};", coin.Key, coin.Value.Value, coin.Value.Name);
+			}
+
+			return sb.ToString();
+		}
+
+		/// <summary>
+		/// Trys to parse config word and return coins info for the constructor
+		/// {coin byre code}={coin value}={coin name};
+		///                 ^ splitter   ^ splitter  ^entry splitter
+		/// </summary>
+		/// <param name="word">config word</param>
+		/// <param name="coins">out dictionary for parsed word, null if parsing fails</param>
+		/// <returns>true for success, otherwise - false</returns>
+		public static bool TryParseConfigWord(string word, out Dictionary<byte, CoinTypeInfo> coins)
+		{
+			try
+			{
+				var coinWords = word.Split(';');
+				coins = new Dictionary<byte, CoinTypeInfo>(coinWords.Length);
+				foreach (var coinWord in coinWords)
+				{
+					if (string.IsNullOrEmpty(coinWord))
+						continue;
+					var values = coinWord.Split('=');
+					var code = Byte.Parse(values[0]);
+					var value = decimal.Parse(values[1], NumberStyles.Currency);
+					var name = values.Length >= 3 ? values[2] : values[1];
+					coins[code] = new CoinTypeInfo(name, value);
+				}
+			}
+			catch (Exception)
+			{
+				coins = null;
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Default config word :)
+		/// OK it is not default for everybody, but for my acceptor 
+		/// </summary>
+		public static Dictionary<byte, CoinTypeInfo> DefaultConfig = new Dictionary<byte, CoinTypeInfo>
+					{
+						//{5, new CoinTypeInfo("50kNew", 0.5M)},
+						{6, new CoinTypeInfo("1 R new", 1M)},
+						{7, new CoinTypeInfo("2 R new", 2M)},
+						{8, new CoinTypeInfo("5 R new", 5M)},
+						{9, new CoinTypeInfo("10 R new", 10M)},
+
+						//{11, new CoinTypeInfo("50 kopec", 0.5M)},
+						{12, new CoinTypeInfo("1 rubles", 1M)},
+						{13, new CoinTypeInfo("2 rubles", 2M)},
+						{14, new CoinTypeInfo("5 rubles", 5M)},
+						{15, new CoinTypeInfo("10 ruble", 10M)},
+					};
 
 	}
 }
