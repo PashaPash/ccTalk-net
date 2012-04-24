@@ -19,7 +19,7 @@ namespace dk.CctalkLib.Devices
 
 		public ICctalkConnection Connection { get; set; }
 
-		private readonly Checksum _checksumHandler = new Checksum();
+		protected readonly Checksum _checksumHandler = new Checksum();
 
 		static readonly Dictionary<Byte, TimeSpan> PollingIntervalUnits
 			= new Dictionary<byte, TimeSpan>
@@ -59,7 +59,7 @@ namespace dk.CctalkLib.Devices
 			  	};
 
 
-		private CctalkMessage CreateMessage(Byte header)
+		protected CctalkMessage CreateMessage(Byte header)
 		{
 			return new CctalkMessage
 					   {
@@ -93,7 +93,7 @@ namespace dk.CctalkLib.Devices
 
 			var respond = Connection.Send(msg, _checksumHandler);
 			if (respond.DataLength < 2)
-				throw new InvalidResondException(respond);
+				throw new InvalidRespondException(respond);
 
 			var units = respond.Data[0];
 			var value = respond.Data[1];
@@ -112,7 +112,7 @@ namespace dk.CctalkLib.Devices
 
 			var respond = Connection.Send(msg, _checksumHandler);
 			if (respond.DataLength < 1)
-				throw new InvalidResondException(respond);
+				throw new InvalidRespondException(respond);
 
 			return (CctalkDeviceStatus)respond.Data[0];
 		}
@@ -147,7 +147,7 @@ namespace dk.CctalkLib.Devices
 			var respond = Connection.Send(msg, _checksumHandler);
 
 			if (respond.DataLength < 11)
-				throw new InvalidResondException(respond);
+				throw new InvalidRespondException(respond);
 
 			var data = respond.Data;
 			var events = new[]
@@ -176,7 +176,7 @@ namespace dk.CctalkLib.Devices
 			var respond = Connection.Send(msg, _checksumHandler);
 
 			if (respond.DataLength < 3)
-				throw new InvalidResondException(respond);
+				throw new InvalidRespondException(respond);
 
 			Int32 sn = 0;
 			sn += respond.Data[2];
@@ -201,7 +201,7 @@ namespace dk.CctalkLib.Devices
 			var msg = CreateMessage(227);
 			var respond = Connection.Send(msg, _checksumHandler);
 			if (respond.DataLength < 1)
-				throw new InvalidResondException(respond);
+				throw new InvalidRespondException(respond);
 
 			bool isInhibiting = (respond.Data[0] & 0x01) == 0; // only last bit significant
 			return isInhibiting;
@@ -215,7 +215,7 @@ namespace dk.CctalkLib.Devices
 
 			var respond = Connection.Send(msg, _checksumHandler);
 			if (respond.DataLength < 1)
-				throw new InvalidResondException(respond);
+				throw new InvalidRespondException(respond);
 
 			var ret = ParseAsciiHelper(respond.Data);
 
@@ -233,7 +233,7 @@ namespace dk.CctalkLib.Devices
 		{
 			var ret = ParseMessage(source, offset, length);
 			if (ret.Header != 0)
-				throw new InvalidResondFormatException(source, "Invalid respond header");
+				throw new InvalidRespondFormatException(source, "Invalid respond header. Possible reason: echo is enabled");
 			return ret;
 		}
 
@@ -288,7 +288,7 @@ namespace dk.CctalkLib.Devices
 		private static Int32 GetExpectedLength(Byte[] respondRawData)
 		{
 			if (respondRawData.Length <= CctalkMessage.MinMessageLength)
-				throw new InvalidResondFormatException(respondRawData);
+				throw new InvalidRespondFormatException(respondRawData);
 
 			var dataLen = respondRawData[CctalkMessage.PosDataLen];
 			return CctalkMessage.MinMessageLength + dataLen; // 1Src+1Len+1Dest+1Header+Data+1Checksum

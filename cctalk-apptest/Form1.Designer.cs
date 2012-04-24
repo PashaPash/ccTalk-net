@@ -45,13 +45,15 @@
 			this.butPollNow = new System.Windows.Forms.Button();
 			this.butReady = new System.Windows.Forms.Button();
 			this.cbInhibit = new System.Windows.Forms.CheckBox();
-			this.initButton = new System.Windows.Forms.Button();
+			this.initCoinButton = new System.Windows.Forms.Button();
 			this.resetButton = new System.Windows.Forms.Button();
 			this.deviceNumber = new System.Windows.Forms.NumericUpDown();
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.comNumber = new System.Windows.Forms.NumericUpDown();
 			this.configWord = new System.Windows.Forms.TextBox();
+			this.initBillButtom = new System.Windows.Forms.Button();
+			this.label3 = new System.Windows.Forms.Label();
 			this.groupBox1.SuspendLayout();
 			this.contextMenuListBox.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -70,7 +72,7 @@
 			this.button1.TabIndex = 0;
 			this.button1.Text = "Send command";
 			this.button1.UseVisualStyleBackColor = true;
-			this.button1.Click += new System.EventHandler(this.button1_Click);
+			this.button1.Click += new System.EventHandler(this.SendCommandButtonClick);
 			// 
 			// groupBox1
 			// 
@@ -81,7 +83,7 @@
 			this.groupBox1.Controls.Add(this.radioButton1);
 			this.groupBox1.Controls.Add(this.button1);
 			this.groupBox1.Enabled = false;
-			this.groupBox1.Location = new System.Drawing.Point(449, 12);
+			this.groupBox1.Location = new System.Drawing.Point(559, 12);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(113, 181);
 			this.groupBox1.TabIndex = 2;
@@ -150,7 +152,7 @@
 			this.listBox1.FormattingEnabled = true;
 			this.listBox1.Location = new System.Drawing.Point(12, 12);
 			this.listBox1.Name = "listBox1";
-			this.listBox1.Size = new System.Drawing.Size(431, 407);
+			this.listBox1.Size = new System.Drawing.Size(541, 355);
 			this.listBox1.TabIndex = 3;
 			// 
 			// contextMenuListBox
@@ -195,9 +197,9 @@
 			this.panel1.Controls.Add(this.cbInhibit);
 			this.panel1.Controls.Add(this.cbPolling);
 			this.panel1.Enabled = false;
-			this.panel1.Location = new System.Drawing.Point(12, 484);
+			this.panel1.Location = new System.Drawing.Point(12, 464);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(431, 86);
+			this.panel1.Size = new System.Drawing.Size(434, 86);
 			this.panel1.TabIndex = 5;
 			// 
 			// butPollNow
@@ -218,7 +220,7 @@
 			this.butReady.TabIndex = 5;
 			this.butReady.Text = "Ready?";
 			this.butReady.UseVisualStyleBackColor = true;
-			this.butReady.Click += new System.EventHandler(this.ready_Click);
+			this.butReady.Click += new System.EventHandler(this.ReadyButtonClick);
 			// 
 			// cbInhibit
 			// 
@@ -231,28 +233,28 @@
 			this.cbInhibit.UseVisualStyleBackColor = true;
 			this.cbInhibit.CheckedChanged += new System.EventHandler(this.cbInhibit_CheckedChanged);
 			// 
-			// initButton
+			// initCoinButton
 			// 
-			this.initButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.initButton.Location = new System.Drawing.Point(455, 484);
-			this.initButton.Name = "initButton";
-			this.initButton.Size = new System.Drawing.Size(100, 41);
-			this.initButton.TabIndex = 6;
-			this.initButton.Text = "Init";
-			this.initButton.UseVisualStyleBackColor = true;
-			this.initButton.Click += new System.EventHandler(this.initButton_Click);
+			this.initCoinButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.initCoinButton.Location = new System.Drawing.Point(452, 477);
+			this.initCoinButton.Name = "initCoinButton";
+			this.initCoinButton.Size = new System.Drawing.Size(101, 28);
+			this.initCoinButton.TabIndex = 6;
+			this.initCoinButton.Text = "CoinAcceptor";
+			this.initCoinButton.UseVisualStyleBackColor = true;
+			this.initCoinButton.Click += new System.EventHandler(this.initCoinButton_Click);
 			// 
 			// resetButton
 			// 
 			this.resetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.resetButton.Enabled = false;
-			this.resetButton.Location = new System.Drawing.Point(455, 531);
+			this.resetButton.Location = new System.Drawing.Point(452, 511);
 			this.resetButton.Name = "resetButton";
-			this.resetButton.Size = new System.Drawing.Size(100, 39);
+			this.resetButton.Size = new System.Drawing.Size(220, 39);
 			this.resetButton.TabIndex = 6;
 			this.resetButton.Text = "Reset";
 			this.resetButton.UseVisualStyleBackColor = true;
-			this.resetButton.Click += new System.EventHandler(this.resetButton_Click);
+			this.resetButton.Click += new System.EventHandler(this.ResetButtonClick);
 			// 
 			// deviceNumber
 			// 
@@ -279,7 +281,7 @@
 			this.groupBox2.Controls.Add(this.deviceNumber);
 			this.groupBox2.Controls.Add(this.label1);
 			this.groupBox2.Controls.Add(this.label2);
-			this.groupBox2.Location = new System.Drawing.Point(449, 193);
+			this.groupBox2.Location = new System.Drawing.Point(559, 193);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(113, 100);
 			this.groupBox2.TabIndex = 7;
@@ -304,25 +306,46 @@
 			// 
 			// configWord
 			// 
-			this.configWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this.configWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.configWord.Location = new System.Drawing.Point(12, 425);
+			this.configWord.Location = new System.Drawing.Point(12, 373);
 			this.configWord.Multiline = true;
 			this.configWord.Name = "configWord";
-			this.configWord.Size = new System.Drawing.Size(553, 53);
+			this.configWord.Size = new System.Drawing.Size(660, 79);
 			this.configWord.TabIndex = 8;
-			this.configWord.Text = "2=5;Rub,";
+			// 
+			// initBillButtom
+			// 
+			this.initBillButtom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.initBillButtom.Location = new System.Drawing.Point(565, 477);
+			this.initBillButtom.Name = "initBillButtom";
+			this.initBillButtom.Size = new System.Drawing.Size(107, 28);
+			this.initBillButtom.TabIndex = 6;
+			this.initBillButtom.Text = "BillValidator";
+			this.initBillButtom.UseVisualStyleBackColor = true;
+			this.initBillButtom.Click += new System.EventHandler(this.initBillButton_Click);
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(452, 461);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(47, 13);
+			this.label3.TabIndex = 9;
+			this.label3.Text = "Initialize:";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(574, 582);
-			this.Controls.Add(this.configWord);
+			this.ClientSize = new System.Drawing.Size(684, 562);
 			this.Controls.Add(this.resetButton);
 			this.Controls.Add(this.groupBox2);
-			this.Controls.Add(this.initButton);
+			this.Controls.Add(this.configWord);
+			this.Controls.Add(this.label3);
 			this.Controls.Add(this.panel1);
+			this.Controls.Add(this.initBillButtom);
+			this.Controls.Add(this.initCoinButton);
 			this.Controls.Add(this.listBox1);
 			this.Controls.Add(this.groupBox1);
 			this.MinimumSize = new System.Drawing.Size(302, 436);
@@ -359,7 +382,7 @@
 		private System.Windows.Forms.CheckBox cbInhibit;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.NumericUpDown comNumber;
-		private System.Windows.Forms.Button initButton;
+		private System.Windows.Forms.Button initCoinButton;
 		private System.Windows.Forms.Button resetButton;
 		private System.Windows.Forms.NumericUpDown deviceNumber;
 		private System.Windows.Forms.Label label2;
@@ -368,6 +391,8 @@
 		private System.Windows.Forms.CheckBox cbBrute;
 		private System.Windows.Forms.Button butPollNow;
 		private System.Windows.Forms.TextBox configWord;
+		private System.Windows.Forms.Button initBillButtom;
+		private System.Windows.Forms.Label label3;
     }
 }
 

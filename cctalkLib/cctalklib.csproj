@@ -91,9 +91,15 @@
     <Compile Include="Devices\DeviceEvent.cs" />
     <Compile Include="Devices\DeviceEventBuffer.cs" />
     <Compile Include="Devices\GenericCctalkDevice.cs" />
-    <Compile Include="Devices\InvalidResondException.cs" />
-    <Compile Include="Devices\InvalidResondFormatException.cs" />
+    <Compile Include="Devices\InvalidRespondException.cs" />
+    <Compile Include="Devices\InvalidRespondFormatException.cs" />
     <Compile Include="Connections\ICctalkConnection.cs" />
+    <Compile Include="Devices\BillValidator.cs" />
+    <Compile Include="Devices\BillValidatorCctalkDevice.cs" />
+    <Compile Include="Devices\BillValidatorErrorEventArgs.cs" />
+    <Compile Include="Devices\BillValidatorErrors.cs" />
+    <Compile Include="Devices\BillValidatorBillEventArgs.cs" />
+    <Compile Include="Devices\BillTypeInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\CcTalkMessage.cs" />
   </ItemGroup>

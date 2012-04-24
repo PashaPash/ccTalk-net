@@ -8,34 +8,102 @@ using dk.CctalkLib.Devices;
 
 namespace cctalk_apptest
 {
+
+	/// <summary>
+	///  This form demonstrates usage of money acceptors through cctalk API
+	/// </summary>
 	public partial class Form1 : Form
 	{
-		CoinAcceptor _ca;
-		Decimal _coinCounter = 0;
+		CoinAcceptor _coinAcceptor;
+		BillValidator _billValidator;
+
+		Decimal _coinCounter; // counts accepted money amount in coins
+		Decimal _notesCounter;// counts accepted money amount in bills
 
 		public Form1()
 		{
 			InitializeComponent();
-			configWord.Text = CoinAcceptor.ConfigWord(CoinAcceptor.DefaultConfig);
+
+			// Showing message about current config for defices
+			var configMessage = String.Format("Coin config:{0}{1}{0}Bill config:{0}{2}",
+			                                  Environment.NewLine,
+			                                  CoinAcceptor.ConfigWord(CoinAcceptor.DefaultConfig),
+			                                  BillValidator.ConfigWord(BillValidator.DefaultConfig));
+
+			configWord.Text = configMessage;
 
 		}
+
+		#region Device managment helpers
 
 		private void TryCreateCoinAcceptor()
 		{
 			try
 			{
 				CreateCoinAcceptor();
-			} catch(Exception ex)
+			}
+			catch (Exception ex)
 			{
 				MessageBox.Show(ex.ToString());
 				DisposeCoinAcceptor();
+
+				////5-10 seconds device can be "Unusable"
+				//Thread.Sleep(5000);
+				//CreateCoinAcceptor();
+			}
+
+
+		}
+
+		private void TryCreateBillValidator()
+		{
+			try
+			{
+				CreateBillValidator();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+				DisposeBillValidator();
 
 				////5-10 srconds device can be "Unusable"
 				//Thread.Sleep(5000);
 				//CreateCoinAcceptor();
 			}
 
+		}
 
+
+		private void CreateBillValidator()
+		{
+			var con = new ConnectionRs232
+						{
+							PortName = GetCom(),
+							RemoveEcho = true // if we are connected to USB-COM echo is present otherwise set to false
+						};
+
+			Dictionary<byte, BillTypeInfo> notes;
+			if (!BillValidator.TryParseConfigWord(configWord.Text, out notes))
+			{
+				MessageBox.Show("Wrong config word, using defaults");
+
+				notes = BillValidator.DefaultConfig;
+				configWord.Text = BillValidator.ConfigWord(BillValidator.DefaultConfig);
+			}
+
+			_billValidator = new BillValidator(Convert.ToByte(deviceNumber.Value), con, notes, null);
+
+			_billValidator.NotesAccepted += BillValidatorNotesAccepted;
+			_billValidator.ErrorMessageAccepted += BillValidatorErrorMessageAccepted;
+
+			_billValidator.Init();
+
+			groupBox1.Enabled = true;
+			panel1.Enabled = true;
+
+			initCoinButton.Enabled = false;
+			resetButton.Enabled = true;
+			configWord.Enabled = false;
 		}
 
 		private void CreateCoinAcceptor()
@@ -54,73 +122,108 @@ namespace cctalk_apptest
 				configWord.Text = CoinAcceptor.ConfigWord(CoinAcceptor.DefaultConfig);
 			}
 
-			_ca = new CoinAcceptor(
-				Convert.ToByte(deviceNumber.Value),
-				con,
-				coins,
-					null
-				);
+			_coinAcceptor = new CoinAcceptor(Convert.ToByte(deviceNumber.Value), con, coins, null);
 
-			_ca.CoinAccepted += _ca_CoinAccepted;
-			_ca.ErrorMessageAccepted += _ca_ErrorMessageAccepted;
+			_coinAcceptor.CoinAccepted += CoinAcceptorCoinAccepted;
+			_coinAcceptor.ErrorMessageAccepted += CoinAcceptorErrorMessageAccepted;
 
-			_ca.Init();
+			_coinAcceptor.Init();
 
 			groupBox1.Enabled = true;
 			panel1.Enabled = true;
 
-			initButton.Enabled = false;
+			initCoinButton.Enabled = false;
 			resetButton.Enabled = true;
 			configWord.Enabled = false;
 		}
 
 		private void DisposeCoinAcceptor()
 		{
-			if (_ca == null)
+			if (_coinAcceptor == null)
 				return;
 
-			if (_ca.IsInitialized)
+			if (_coinAcceptor.IsInitialized)
 			{
-				_ca.IsInhibiting = true;
-				_ca.UnInit();
+				_coinAcceptor.IsInhibiting = true;
+				_coinAcceptor.UnInit();
 			}
 
-			_ca.Dispose();
+			_coinAcceptor.Dispose();
 
-			_ca = null;
+			_coinAcceptor = null;
 
 			groupBox1.Enabled = false;
 			panel1.Enabled = false;
-			initButton.Enabled = true;
+			initCoinButton.Enabled = true;
 			resetButton.Enabled = false;
 			configWord.Enabled = true;
 		}
 
+		private void DisposeBillValidator()
+		{
+			if (_billValidator == null)
+				return;
+
+			if (_billValidator.IsInitialized)
+			{
+				_billValidator.IsInhibiting = true;
+				_billValidator.UnInit();
+			}
+
+			_billValidator.Dispose();
+
+			_billValidator = null;
+
+			groupBox1.Enabled = false;
+			panel1.Enabled = false;
+			initCoinButton.Enabled = true;
+			resetButton.Enabled = false;
+			configWord.Enabled = true;
+		}
+
+		# endregion
 
 		private string GetCom()
 		{
 			return string.Format("com{0:g0}", comNumber.Value);
 		}
 
-		void _ca_ErrorMessageAccepted(object sender, CoinAcceptorErrorEventArgs e)
+		void CoinAcceptorErrorMessageAccepted(object sender, CoinAcceptorErrorEventArgs e)
 		{
 			if (InvokeRequired)
 			{
-				Invoke((EventHandler<CoinAcceptorErrorEventArgs>)_ca_ErrorMessageAccepted, sender, e);
+				Invoke((EventHandler<CoinAcceptorErrorEventArgs>)CoinAcceptorErrorMessageAccepted, sender, e);
 				return;
 			}
 
 			listBox1.Items.Add(String.Format("Coin acceptor error: {0} ({1}, {2:X2})", e.ErrorMessage, e.Error, (Byte)e.Error));
 
 			listBox1.SelectedIndex = listBox1.Items.Count - 1;
-			//listBox1.SelectedIndex = -1;
 		}
 
-		void _ca_CoinAccepted(object sender, CoinAcceptorCoinEventArgs e)
+
+		void BillValidatorErrorMessageAccepted(object sender, BillValidatorErrorEventArgs e)
 		{
 			if (InvokeRequired)
 			{
-				Invoke((EventHandler<CoinAcceptorCoinEventArgs>)_ca_CoinAccepted, sender, e);
+				Invoke((EventHandler<BillValidatorErrorEventArgs>)BillValidatorErrorMessageAccepted, sender, e);
+				return;
+			}
+
+			listBox1.Items.Add(String.Format("Notes acceptor error: {0} ({1}, {2:X2})", e.ErrorMessage, e.Error, (Byte)e.Error));
+
+			listBox1.SelectedIndex = listBox1.Items.Count - 1;
+			//listBox1.SelectedIndex = -1;
+		}
+
+
+
+
+		void CoinAcceptorCoinAccepted(object sender, CoinAcceptorCoinEventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke((EventHandler<CoinAcceptorCoinEventArgs>)CoinAcceptorCoinAccepted, sender, e);
 				return;
 			}
 			_coinCounter += e.CoinValue;
@@ -128,26 +231,46 @@ namespace cctalk_apptest
 
 			listBox1.SelectedIndex = listBox1.Items.Count - 1;
 			//listBox1.SelectedIndex = -1;
-	
+
 			// There is simulator of long-working event handler
 			Thread.Sleep(1000);
 		}
 
-		private void button1_Click(object sender, EventArgs e)
+
+		void BillValidatorNotesAccepted(object sender, BillValidatorBillEventArgs e)
 		{
-			// Attention! There we are creating new device object. But it could share connection with _ca.
+			if (InvokeRequired)
+			{
+				Invoke((EventHandler<BillValidatorBillEventArgs>)BillValidatorNotesAccepted, sender, e);
+				return;
+			}
+			_notesCounter += e.NoteValue;
+			listBox1.Items.Add(String.Format("Bill accepted: {0} ({1:X2}), path {3}. Now accepted: {2:C}", e.NoteName, e.NoteCode, _notesCounter, e.RoutePath));
+
+			listBox1.SelectedIndex = listBox1.Items.Count - 1;
+			//listBox1.SelectedIndex = -1;
+
+			// There is simulator of long-working event handler
+			Thread.Sleep(1000);
+		}
+
+		private void SendCommandButtonClick(object sender, EventArgs e)
+		{
+			// Attention! There we are creating new device object. But it could share connection with _coinAcceptor.
 			ICctalkConnection con;
 			Boolean isMyConnection;
 
-			if (_ca.Connection.IsOpen())
+			if (_coinAcceptor.Connection.IsOpen())
 			{
-				con = _ca.Connection;
+				con = _coinAcceptor.Connection;
 				isMyConnection = false;
-			} else
+			}
+			else
 			{
 				con = new ConnectionRs232
 				{
 					PortName = GetCom(),
+					RemoveEcho = true      // if we are connected to USB-COM echo is present otherwise set to false
 				};
 				con.Open();
 				isMyConnection = true;
@@ -166,7 +289,7 @@ namespace cctalk_apptest
 
 
 					var sb = new StringBuilder();
-					sb.Append("Принято: ");
+					sb.Append("Accepted: ");
 					sb.AppendFormat("Cntr={0} Data:", buf.Counter);
 					for (int i = 0; i < buf.Events.Length; i++)
 					{
@@ -186,11 +309,13 @@ namespace cctalk_apptest
 					listBox1.SelectedIndex = listBox1.Items.Count - 1;
 
 
-				} else if (radioButton3.Checked)
+				}
+				else if (radioButton3.Checked)
 				{
 					c.CmdReset();
 				}
-			} finally
+			}
+			finally
 			{
 				if (isMyConnection)
 					con.Close();
@@ -206,55 +331,85 @@ namespace cctalk_apptest
 
 		private void cbPolling_CheckedChanged(object sender, EventArgs e)
 		{
-			if (_ca == null) return;
+			if (_billValidator == null) return;
 
-			if (!_ca.IsInitialized)
-				_ca.Init();
+			if (!_billValidator.IsInitialized)
+				_billValidator.Init();
 
 			if (cbPolling.Checked)
-				_ca.StartPoll();
+				_billValidator.StartPoll();
 			else
-				_ca.EndPoll();
+				_billValidator.EndPoll();
 
-			//groupBox1.Enabled = !_ca.IsPolling;
+			//groupBox1.Enabled = !_coinAcceptor.IsPolling;
 
 		}
 
 		private void clearMoneyCounterToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			_coinCounter = 0;
+			_notesCounter = 0;
 		}
 
 		private void cbInhibit_CheckedChanged(object sender, EventArgs e)
 		{
-			_ca.IsInhibiting = cbInhibit.Checked;
+			if (_billValidator != null)
+				_billValidator.IsInhibiting = cbInhibit.Checked;
+
+			if (_coinAcceptor != null)
+				_coinAcceptor.IsInhibiting = cbInhibit.Checked;
+
 		}
 
-		private void initButton_Click(object sender, EventArgs e)
+		private void initBillButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				TryCreateBillValidator();
+			}
+			catch (Exception ex)
+			{
+
+				DisposeBillValidator();
+				MessageBox.Show(ex.Message, "Error while connecting bill validator", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+		}
+
+		private void initCoinButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				TryCreateCoinAcceptor();
-			} catch (Exception ex)
+			}
+			catch (Exception ex)
 			{
 
 				DisposeCoinAcceptor();
-				MessageBox.Show(ex.Message, "Error while connecting device", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(ex.Message, "Error while connecting coin acceptor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
-		private void resetButton_Click(object sender, EventArgs e)
+		private void ResetButtonClick(object sender, EventArgs e)
 		{
 			_brutimer.Stop();
 
 			DisposeCoinAcceptor();
+			DisposeBillValidator();
 			cbPolling.Checked = false;
 
 		}
 
-		private void ready_Click(object sender, EventArgs e)
+		private void ReadyButtonClick(object sender, EventArgs e)
 		{
-			MessageBox.Show("GetStatus = " + _ca.GetStatus(), Text);
+			var message = String.Format(
+				"Coin acceptor status:{0}{1}{0}" +
+				"Bill validator status:{0}{2}",
+				Environment.NewLine,
+				_coinAcceptor == null ? "not inited" : _coinAcceptor.GetStatus().ToString(),
+				_billValidator == null ? "not inited" : _billValidator.GetStatus().ToString()
+				);
+
+			MessageBox.Show(message, Text);
 		}
 
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -266,12 +421,14 @@ namespace cctalk_apptest
 
 		private void cbBrute_CheckedChanged(object sender, EventArgs e)
 		{
-			if(cbBrute.Checked)
+			// Let`s send many requests to device.
+			if (cbBrute.Checked)
 			{
 				_brutimer.Interval = 1;
 				_brutimer.Start();
 				_brutimer.Tick += _brutimer_Tick;
-			}else
+			}
+			else
 			{
 				_brutimer.Stop();
 			}
@@ -279,13 +436,18 @@ namespace cctalk_apptest
 
 		void _brutimer_Tick(object sender, EventArgs e)
 		{
-			button1_Click(sender, e);
+			SendCommandButtonClick(sender, e);
 		}
 
 		private void butPollNow_Click(object sender, EventArgs e)
 		{
-			if(_ca == null) return;
-			_ca.PollNow();
+			if (_coinAcceptor != null)
+				_coinAcceptor.PollNow();
+
+			if (_billValidator != null)
+				_billValidator.PollNow();
 		}
+
+
 	}
 }

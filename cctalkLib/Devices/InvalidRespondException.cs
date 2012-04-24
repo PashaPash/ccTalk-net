@@ -4,14 +4,14 @@ using dk.CctalkLib.Messages;
 namespace dk.CctalkLib.Devices
 {
 	[Serializable]
-	internal class InvalidResondException : Exception
+	internal class InvalidRespondException : Exception
 	{
-		public InvalidResondException(CctalkMessage respond)
+		public InvalidRespondException(CctalkMessage respond)
 			: this(respond, "Invalid respond")
 		{
 		}
 
-		public InvalidResondException(CctalkMessage respond, string message)
+		public InvalidRespondException(CctalkMessage respond, string message)
 			: base(message)
 		{
 			InvalidRespond = respond;

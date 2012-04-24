@@ -11,12 +11,13 @@ namespace dk.CctalkLib.Connections
 
 	/// <summary>
 	///  Incapsulates routines for Com-port exchange with device.
-	///  Provides syncronisation for send requests and waits for respond from device.
+	///  Provides syncronization for send requests and waits for respond from device.
 	/// </summary>
 	public class ConnectionRs232 : ICctalkConnection
 	{
 		const Int32 RespondStartTimeout = 2000;
-		const Int32 RespondDataTimeout = 50;
+		const Int32 RespondDataTimeout = 50;   //time to wait next byte within message packet recive operation. Correspinds to 11.1 paragraph of ccTalk Generic Specification
+		// const Int32 RespondDataTimeout = 1500;
 
 
 		readonly Object _callSyncRoot = new Object();
@@ -26,6 +27,7 @@ namespace dk.CctalkLib.Connections
 		readonly Byte[] _respondBuf = new byte[255];
 		readonly AutoResetEvent _readWait = new AutoResetEvent(false);
 		private readonly Stopwatch _timer = new Stopwatch();
+		private bool _removeEcho = false;
 
 
 
@@ -69,6 +71,12 @@ namespace dk.CctalkLib.Connections
 			set { _port.PortName = value; }
 		}
 
+		public bool RemoveEcho
+		{
+			get { return _removeEcho; }
+			set { _removeEcho = value; }
+		}
+
 
 		public ConnectionRs232()
 		{
@@ -82,7 +90,9 @@ namespace dk.CctalkLib.Connections
 		{
 			_port.Handshake = Handshake.None;
 			_port.Parity = Parity.None;
+			//_port.Parity = Parity.Odd;
 			_port.PortName = "com1";
+			//_port.BaudRate = 921600;
 			_port.BaudRate = 9600;
 			_port.StopBits = StopBits.One;
 			_port.DataBits = 8;
@@ -172,6 +182,9 @@ namespace dk.CctalkLib.Connections
 				_port.ReadTimeout = RespondStartTimeout;
 				Int32 respondBufPos = 0;
 				CctalkMessage respond;
+
+
+				var echoRemover = 0;
 				while (true)
 				{
 					try
@@ -179,6 +192,11 @@ namespace dk.CctalkLib.Connections
 						var b = (Byte)_port.ReadByte();
 						_port.ReadTimeout = RespondDataTimeout;
 
+						if (_removeEcho && (echoRemover < msgBytes.Length))
+						{
+							echoRemover++;
+							continue;
+						}
 						_respondBuf[respondBufPos] = b;
 						respondBufPos++;
 
@@ -189,19 +207,20 @@ namespace dk.CctalkLib.Connections
 							{
 								var copy = new byte[respondBufPos];
 								Array.Copy(_respondBuf, copy, respondBufPos);
-								throw new InvalidResondFormatException(copy, "Checksumm check fail");
+								throw new InvalidRespondFormatException(copy, "Checksumm check fail");
 							}
 							respond = GenericCctalkDevice.ParseRespond(_respondBuf, 0, respondBufPos);
 							Array.Clear(_respondBuf, 0, _respondBuf.Length);
 							break;
 						}
 
-					} catch (TimeoutException ex)
+					}
+					catch (TimeoutException ex)
 					{
 						if (_port.ReadTimeout == RespondStartTimeout)
 							throw new TimeoutException("Device not respondng", ex);
 
-						throw new TimeoutException("Pause in reply", ex);
+						throw new TimeoutException("Pause in reply (should reset all communication vatiables and be ready to recive the next message)", ex);
 
 					}
 				}
