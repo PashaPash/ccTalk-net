@@ -10,9 +10,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cctalk-apptest", "cctalk-ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests-cctalklib", "Tests-cctalklib\Tests-cctalklib.csproj", "{BE9705BB-58CA-418B-8F94-49D32E137575}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Binaries", "Binaries", "{32A87C58-4D66-42F0-BECD-229C2B8469E4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1F01D59E-E740-4132-8D96-AC653354B799}"
 	ProjectSection(SolutionItems) = preProject
-		nunit.framework.dll = nunit.framework.dll
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Global
