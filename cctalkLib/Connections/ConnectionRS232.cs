@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.IO.Ports;
 using dk.CctalkLib.Checksumms;
@@ -15,18 +16,19 @@ namespace dk.CctalkLib.Connections
 	/// </summary>
 	public class ConnectionRs232 : ICctalkConnection
 	{
+		private NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
 		const Int32 RespondStartTimeout = 2000;
 		const Int32 RespondDataTimeout = 50;   //time to wait next byte within message packet recive operation. Correspinds to 11.1 paragraph of ccTalk Generic Specification
 		// const Int32 RespondDataTimeout = 1500;
 
 
 		readonly Object _callSyncRoot = new Object();
-		readonly Object _phaseSyncRoot = new Object();
+		//readonly Object _phaseSyncRoot = new Object();
 
 		readonly SerialPort _port = new SerialPort();
 		readonly Byte[] _respondBuf = new byte[255];
-		readonly AutoResetEvent _readWait = new AutoResetEvent(false);
-		private readonly Stopwatch _timer = new Stopwatch();
+		//readonly AutoResetEvent _readWait = new AutoResetEvent(false);
+		//private readonly Stopwatch _timer = new Stopwatch();
 		private bool _removeEcho = false;
 
 
@@ -84,6 +86,8 @@ namespace dk.CctalkLib.Connections
 
 			_port.ReadBufferSize = 2048;
 			_port.WriteBufferSize = 2048;
+
+			Log.Debug("Created");
 		}
 
 		void SetDefaultPortConfig()
@@ -119,6 +123,7 @@ namespace dk.CctalkLib.Connections
 			_port.Dispose();
 			//if (_serialPort.IsOpen) 
 			//	_serialPort.Close();
+			Log.Debug("Disposed");
 		}
 
 		#endregion
@@ -145,6 +150,8 @@ namespace dk.CctalkLib.Connections
 				_port.DiscardInBuffer();
 				_port.DiscardOutBuffer();
 				IsOpen();
+
+				Log.Debug("Opened");
 			}
 		}
 
@@ -157,6 +164,8 @@ namespace dk.CctalkLib.Connections
 			{
 				//_port.DataReceived -= SerialPortDataReceived;
 				_port.Close();
+
+				Log.Debug("Closed");
 			}
 		}
 
@@ -169,6 +178,8 @@ namespace dk.CctalkLib.Connections
 			// TODO: handle BUSY message
 			lock (_callSyncRoot)
 			{
+				Log.Debug("Sending message from {0} to {1}. Header={2}", com.SourceAddr, com.DestAddr, com.Header);
+
 
 				var msgBytes = com.GetTransferDataNoChecksumm();
 				chHandler.CalcAndApply(msgBytes);
@@ -178,6 +189,8 @@ namespace dk.CctalkLib.Connections
 				_port.DiscardInBuffer();
 
 				_port.Write(msgBytes, 0, msgBytes.Length);
+
+				Log.Trace("Message sent, waiting for respond");
 
 				_port.ReadTimeout = RespondStartTimeout;
 				Int32 respondBufPos = 0;
@@ -190,6 +203,7 @@ namespace dk.CctalkLib.Connections
 					try
 					{
 						var b = (Byte)_port.ReadByte();
+						// after first respond package we wait fo rest respond packages with another timout
 						_port.ReadTimeout = RespondDataTimeout;
 
 						if (_removeEcho && (echoRemover < msgBytes.Length))
@@ -220,6 +234,15 @@ namespace dk.CctalkLib.Connections
 						if (_port.ReadTimeout == RespondStartTimeout)
 							throw new TimeoutException("Device not respondng", ex);
 
+						var respondBufContents = new StringBuilder();
+						for (int i = 0; i > respondBufPos; i++)
+						{
+							respondBufContents.Append(_respondBuf[i].ToString("X"))
+							                  .Append(" ");
+
+						}
+						Log.Debug("Pause in reply error. Recive buffer contents {0} bytes: {1}", respondBufPos, respondBufContents);
+						Array.Clear(_respondBuf, 0, _respondBuf.Length);
 						throw new TimeoutException("Pause in reply (should reset all communication vatiables and be ready to recive the next message)", ex);
 
 					}
