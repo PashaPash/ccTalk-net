@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cctalklib", "cctalklib\cctalklib.csproj", "{32866FA6-BCA4-4FE8-9006-CFE92780B9BF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cctalk-apptest", "cctalk-apptest\cctalk-apptest.csproj", "{32D3817B-C62E-4990-890B-EA1CF821B670}"
