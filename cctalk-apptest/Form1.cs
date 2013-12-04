@@ -111,6 +111,7 @@ namespace cctalk_apptest
 			var con = new ConnectionRs232
 						{
 							PortName = GetCom(),
+                            RemoveEcho = true
 						};
 
 			Dictionary<byte, CoinTypeInfo> coins;
