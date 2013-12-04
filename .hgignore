@@ -1,0 +1,6 @@
+syntax: glob
+bin
+obj
+*.suo
+*.user
+packages
