@@ -16,7 +16,6 @@ namespace dk.CctalkLib.Connections
 	/// </summary>
 	public class ConnectionRs232 : ICctalkConnection
 	{
-		private NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
 		const Int32 RespondStartTimeout = 2000;
 		const Int32 RespondDataTimeout = 50;   //time to wait next byte within message packet recive operation. Correspinds to 11.1 paragraph of ccTalk Generic Specification
 		// const Int32 RespondDataTimeout = 1500;
@@ -87,7 +86,7 @@ namespace dk.CctalkLib.Connections
 			_port.ReadBufferSize = 2048;
 			_port.WriteBufferSize = 2048;
 
-			Log.Debug("Created");
+			Trace.TraceInformation("Created");
 		}
 
 		void SetDefaultPortConfig()
@@ -123,7 +122,7 @@ namespace dk.CctalkLib.Connections
 			_port.Dispose();
 			//if (_serialPort.IsOpen) 
 			//	_serialPort.Close();
-			Log.Debug("Disposed");
+			Trace.TraceInformation("Disposed");
 		}
 
 		#endregion
@@ -151,7 +150,7 @@ namespace dk.CctalkLib.Connections
 				_port.DiscardOutBuffer();
 				IsOpen();
 
-				Log.Debug("Opened");
+				Trace.TraceInformation("Opened");
 			}
 		}
 
@@ -165,7 +164,7 @@ namespace dk.CctalkLib.Connections
 				//_port.DataReceived -= SerialPortDataReceived;
 				_port.Close();
 
-				Log.Debug("Closed");
+				Trace.TraceInformation("Closed");
 			}
 		}
 
@@ -178,7 +177,7 @@ namespace dk.CctalkLib.Connections
 			// TODO: handle BUSY message
 			lock (_callSyncRoot)
 			{
-				Log.Debug("Sending message from {0} to {1}. Header={2}", com.SourceAddr, com.DestAddr, com.Header);
+				Trace.TraceInformation("Sending message from {0} to {1}. Header={2}", com.SourceAddr, com.DestAddr, com.Header);
 
 
 				var msgBytes = com.GetTransferDataNoChecksumm();
@@ -190,7 +189,7 @@ namespace dk.CctalkLib.Connections
 
 				_port.Write(msgBytes, 0, msgBytes.Length);
 
-				Log.Trace("Message sent, waiting for respond");
+				Trace.TraceInformation("Message sent, waiting for respond");
 
 				_port.ReadTimeout = RespondStartTimeout;
 				Int32 respondBufPos = 0;
@@ -241,7 +240,7 @@ namespace dk.CctalkLib.Connections
 							                  .Append(" ");
 
 						}
-						Log.Debug("Pause in reply error. Recive buffer contents {0} bytes: {1}", respondBufPos, respondBufContents);
+						Trace.TraceInformation("Pause in reply error. Recive buffer contents {0} bytes: {1}", respondBufPos, respondBufContents);
 						Array.Clear(_respondBuf, 0, _respondBuf.Length);
 						throw new TimeoutException("Pause in reply (should reset all communication vatiables and be ready to recive the next message)", ex);
 

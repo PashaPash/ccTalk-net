@@ -7,6 +7,7 @@ using dk.CctalkLib.Checksumms;
 using dk.CctalkLib.Connections;
 using dk.CctalkLib.Messages;
 using System.Collections;
+using System.Diagnostics;
 
 namespace dk.CctalkLib.Devices
 {
@@ -15,8 +16,6 @@ namespace dk.CctalkLib.Devices
 	/// </summary>
 	public class GenericCctalkDevice
 	{
-		private NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
-
 		public static readonly Byte SourceAddress = 1;
 
 		public Byte Address { get; set; }
@@ -77,7 +76,7 @@ namespace dk.CctalkLib.Devices
 
 		public void CmdReset()
 		{
-			Log.Debug("Cmd: Reset");
+			Trace.TraceInformation("Cmd: Reset");
 			var msg = CreateMessage(1);
 
 			Connection.Send(msg, _checksumHandler);
@@ -87,7 +86,7 @@ namespace dk.CctalkLib.Devices
 
 		public void CmdSimplePoll()
 		{
-			Log.Debug("Cmd: Poll");
+			Trace.TraceInformation("Cmd: Poll");
 
 			var msg = CreateMessage(254);
 
@@ -96,7 +95,7 @@ namespace dk.CctalkLib.Devices
 
 		public TimeSpan CmdRequestPollingPriority()
 		{
-			Log.Debug("Cmd: RequestPollingPriority");
+			Trace.TraceInformation("Cmd: RequestPollingPriority");
 			var msg = CreateMessage(249);
 
 			var respond = Connection.Send(msg, _checksumHandler);
@@ -116,7 +115,7 @@ namespace dk.CctalkLib.Devices
 
 		public CctalkDeviceStatus CmdRequestStatus()
 		{
-			Log.Debug("Cmd: RequestStatus");
+			Trace.TraceInformation("Cmd: RequestStatus");
 			var msg = CreateMessage(248);
 
 			var respond = Connection.Send(msg, _checksumHandler);
@@ -128,7 +127,7 @@ namespace dk.CctalkLib.Devices
 
         public void CmdModifyInhibitStatus(bool[] coinInhibitStatuses)
         {
-            Log.Debug("Cmd: ModifyInhibitStatus");
+            Trace.TraceInformation("Cmd: ModifyInhibitStatus");
             var msg = CreateMessage(231);
 
             if (coinInhibitStatuses.Length > 16)
@@ -146,13 +145,13 @@ namespace dk.CctalkLib.Devices
 
         public String CmdRequestManufacturerId()
 		{
-			Log.Debug("Cmd: RequestManufacturerId");
+			Trace.TraceInformation("Cmd: RequestManufacturerId");
 			return RequestForStringHelper(246);
 
 		}
 		public CctalkDeviceTypes CmdRequestEquipmentCategory()
 		{
-			Log.Debug("Cmd: RequestEquipmentCategory");
+			Trace.TraceInformation("Cmd: RequestEquipmentCategory");
 
 			var catName = RequestForStringHelper(245);
 
@@ -164,21 +163,21 @@ namespace dk.CctalkLib.Devices
 
 		public String CmdRequestProductCode()
 		{
-			Log.Debug("Cmd: RequestProductCode");
+			Trace.TraceInformation("Cmd: RequestProductCode");
 
 			return RequestForStringHelper(244);
 		}
 
 		public String CmdRequestSoftwareRevision()
 		{
-			Log.Debug("Cmd: RequestSoftwareRevision");
+			Trace.TraceInformation("Cmd: RequestSoftwareRevision");
 
 			return RequestForStringHelper(241);
 		}
 
 		public DeviceEventBuffer CmdReadEventBuffer()
 		{
-			Log.Debug("Cmd: ReadEventBuffer");
+			Trace.TraceInformation("Cmd: ReadEventBuffer");
 
 			var msg = CreateMessage(229);
 			var respond = Connection.Send(msg, _checksumHandler);
@@ -209,7 +208,7 @@ namespace dk.CctalkLib.Devices
 
 		public Int32 CmdGetSerial()
 		{
-			Log.Debug("Cmd: GetSerial");
+			Trace.TraceInformation("Cmd: GetSerial");
 
 			var msg = CreateMessage(242);
 			var respond = Connection.Send(msg, _checksumHandler);
@@ -230,7 +229,7 @@ namespace dk.CctalkLib.Devices
 
 		public void CmdSetMasterInhibitStatus(Boolean isInhibiting)
 		{
-			Log.Debug("Cmd: SetMasterInhibitStatus " + isInhibiting);
+			Trace.TraceInformation("Cmd: SetMasterInhibitStatus " + isInhibiting);
 
 			var msg = CreateMessage(228);
 			msg.Data = new[] {(Byte) (isInhibiting ? 0 : 1)};
@@ -239,7 +238,7 @@ namespace dk.CctalkLib.Devices
 
 		public Boolean CmdGetMasterInhibitStatus()
 		{
-			Log.Debug("Cmd: GetMasterInhibitStatus");
+			Trace.TraceInformation("Cmd: GetMasterInhibitStatus");
 
 			var msg = CreateMessage(227);
 			var respond = Connection.Send(msg, _checksumHandler);
