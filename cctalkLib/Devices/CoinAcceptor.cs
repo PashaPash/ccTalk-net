@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Timers;
 using dk.CctalkLib.Connections;
+using System.Linq;
 
 namespace dk.CctalkLib.Devices
 {
@@ -14,8 +15,6 @@ namespace dk.CctalkLib.Devices
 	/// </summary>
 	public class CoinAcceptor : IDisposable
 	{
-		const Int32 PollPeriod = 300;
-
 		readonly GenericCctalkDevice _rawDev = new GenericCctalkDevice();
 
 		Timer _t;
@@ -107,6 +106,7 @@ namespace dk.CctalkLib.Devices
 
 			//_rawDev.CmdReset();
 			_rawDev.CmdSetMasterInhibitStatus(IsInhibiting);
+            _rawDev.CmdModifyInhibitStatus(Enumerable.Repeat(true, 16).ToArray());
 
 			SerialNumber = _rawDev.CmdGetSerial();
 			PollInterval = _rawDev.CmdRequestPollingPriority();
@@ -221,7 +221,7 @@ namespace dk.CctalkLib.Devices
 			{
 				if (!_rawDev.Connection.IsOpen())
 					throw new InvalidOperationException("Init first");
-				_t = new Timer(PollPeriod)
+				_t = new Timer(this.PollInterval.TotalMilliseconds)
 						{
 							AutoReset = false,
 						};
@@ -257,6 +257,10 @@ namespace dk.CctalkLib.Devices
 			return status;
 		}
 
+        public void CmdModifyInhibitStatus(bool[] coinInhibitStatuses)
+        {
+            this._rawDev.CmdModifyInhibitStatus(coinInhibitStatuses);
+        }
 
 		/// <summary>
 		/// Remembers current state of device`s event buffer as empty.

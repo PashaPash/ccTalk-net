@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Threading;
 using dk.CctalkLib.Checksumms;
 using dk.CctalkLib.Connections;
 using dk.CctalkLib.Messages;
+using System.Collections;
 
 namespace dk.CctalkLib.Devices
 {
@@ -123,7 +125,26 @@ namespace dk.CctalkLib.Devices
 
 			return (CctalkDeviceStatus)respond.Data[0];
 		}
-		public String CmdRequestManufacturerId()
+
+        public void CmdModifyInhibitStatus(bool[] coinInhibitStatuses)
+        {
+            Log.Debug("Cmd: ModifyInhibitStatus");
+            var msg = CreateMessage(231);
+
+            if (coinInhibitStatuses.Length > 16)
+                throw new ArgumentException("coinInhibitStatuses is too large");
+
+            BitArray bitArray = new BitArray(coinInhibitStatuses);
+
+            var inhibitBytes = new byte[2];
+            bitArray.CopyTo(inhibitBytes, 0);
+
+            msg.Data = inhibitBytes;
+
+            Connection.Send(msg, _checksumHandler);
+        }
+
+        public String CmdRequestManufacturerId()
 		{
 			Log.Debug("Cmd: RequestManufacturerId");
 			return RequestForStringHelper(246);
